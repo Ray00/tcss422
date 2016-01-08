@@ -53,14 +53,19 @@
 //    PCB_QUEUE_STR_p fifoQueue = (PCB_QUEUE_STR_p) malloc(sizeof(PCB_QUEUE_STR));
 //    fifoQueue = queueConstructor();
 //
-//    // TODO print the contents of the last pcb enqueued.
-//    puts(toString(fifoQueue));
+//    // TODO print the contents of the last pcb enqueued. For some reason its not printing the data.
+//    // The pcb_test.c tests pass fine. We will need to figure this out.
+//    fputs(toString(fifoQueue), stdout);
 //    enqueue(fifoQueue, node1);
-//    puts(toString(fifoQueue));
+//    //PCB_toString((PCB_p)fifoQueue->tail_node);
+//    fputs(toString(fifoQueue), stdout);
 //    enqueue(fifoQueue, node2);
-//    puts(toString(fifoQueue));
+//    //PCB_toString(fifoQueue->tail_node);
+//    fputs(toString(fifoQueue), stdout);
 //    enqueue(fifoQueue, node3);
-//    puts(toString(fifoQueue));
+//    //PCB_toString(fifoQueue->tail_node);
+//    fputs(toString(fifoQueue), stdout);
+//    //PCB_toString(fifoQueue->tail_node);
 //
 //    exit(0);
 //}

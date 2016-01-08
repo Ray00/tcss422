@@ -5,17 +5,21 @@
  *      Author: nabilfadili
  */
 
+#include <stdlib.h>
+#include <time.h>
 #include "pcb.h"
 
 int main() {
 	printf("~PCB ADT Test~\n");
-
 	PCB_p testProcess = PCB_constructor();
-	PCB_setProcessNumber(testProcess, 1);
-	PCB_setPriority(testProcess, 13);
-
-	PCB_toString(testProcess);
-
+	int i;
+	srand(time(NULL));
+	for (i = 0; i < 5; ++i) {
+		PCB_setProcessNumber(testProcess, i);
+		PCB_setPriority(testProcess, rand() % 31);
+		PCB_toString(testProcess);
+	}
+	PCB_destructor(testProcess);
 	exit(0);
 }
 

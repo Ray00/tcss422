@@ -79,5 +79,5 @@ int PCB_getPriority(PCB_p p) {
  * params:	PCB_p pointer to the PCB object in the heap.
  */
 void PCB_toString(PCB_p p) {
-	printf("PCB process number: %d\nPCB priority: %d\n", p->process_num, p->priority);
+	printf("PCB Process Number: %d --- PCB priority: %d\n", p->process_num, p->priority);
 }
