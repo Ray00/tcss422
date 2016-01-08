@@ -7,15 +7,15 @@
 
 #include "pcb.h"
 
-//int main() {
-//	PCB_p testPCB1 = createNewPCB();
-//	PCB_p testPCB2 = createNewPCB();
-//	setPCB_process_num(testPCB1, 0);
-//	setPCB_priority(testPCB1, 13);
-//	setPCB_process_num(testPCB2, 1);
-//	setPCB_priority(testPCB2, 3);
-//
-//	printf("id = %d\npriority = %d\n", testPCB1->process_num, testPCB1->priority);
-//	printf("id = %d\npriority = %d", getPCB_process_num(testPCB2), getPCB_priority(testPCB2));
-//}
+int main() {
+	printf("~PCB ADT Test~\n");
+
+	PCB_p testProcess = PCB_constructor();
+	PCB_setProcessNumber(testProcess, 1);
+	PCB_setPriority(testProcess, 13);
+
+	PCB_toString(testProcess);
+
+	exit(0);
+}
 
