@@ -1,14 +1,15 @@
-/*
- * pcb.c
- *
- *  Created on: Jan 6, 2016
- *      Author: nabilfadili
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "pcb.h"
 
+/*
+ * Function:  pcbConstructor
+ * --------------------
+ * constructs a pcb object, returning a pointer to the pcb object
+ * in the heap
+ *
+ *  returns: 	PCB_p pointer to the PCB object in the heap
+ */
 PCB_p createNewPCB(void) {
 	PCB_p newPCB = (PCB_p) malloc(sizeof(struct pcb_type));
 	//if (newPCB == NULL) {printf("Not enough memory");}
@@ -30,6 +31,3 @@ void setPCB_priority(PCB_p p, int priority) {
 int getPCB_priority(PCB_p p) {
 	return p->priority;
 }
-
-
-

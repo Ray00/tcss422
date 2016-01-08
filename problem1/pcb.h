@@ -1,10 +1,3 @@
-/*
- * pcb.h
- *
- *  Created on: Jan 6, 2016
- *      Author: nabilfadili
- */
-
 #ifndef PCB_H_
 #define PCB_H_
 
