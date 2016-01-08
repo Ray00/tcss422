@@ -3,7 +3,7 @@
 #include "pcb.h"
 
 /*
- * Function:  pcbConstructor
+ * Function:  createNewPCB
  * --------------------
  * constructs a pcb object, returning a pointer to the pcb object
  * in the heap
@@ -12,16 +12,19 @@
  */
 PCB_p createNewPCB(void) {
 	PCB_p newPCB = (PCB_p) malloc(sizeof(struct pcb_type));
-	//if (newPCB == NULL) {printf("Not enough memory");}
 	return newPCB;
 }
 
-void setPCB_id(PCB_p p, int id) {
-	p->id = id;
+void destroyPCB(PCB_p p) {
+	free(p);
 }
 
-int getPCB_id(PCB_p p) {
-	return p->id;
+void setPCB_process_num(PCB_p p, int process_num) {
+	p->process_num = process_num;
+}
+
+int getPCB_process_num(PCB_p p) {
+	return p->process_num;
 }
 
 void setPCB_priority(PCB_p p, int priority) {
