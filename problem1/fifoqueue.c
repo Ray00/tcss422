@@ -34,7 +34,7 @@ NODE_STR_p nodeConstructor(PCB_p pcb_pointer){
  *  returns: 	int function exit status code
  */
 void nodeDestructor(NODE_STR_p node_str_p){
-    pcbDestructor(node_str_p->pcb_addr);  // Kyle fixed. Don't forget to free pcb
+    PCB_destructor(node_str_p->pcb_addr);  // Kyle fixed. Don't forget to free pcb
 	free(node_str_p);
 }
 

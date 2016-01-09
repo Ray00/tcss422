@@ -1,24 +1,16 @@
-//
-//  pcb.c
-//
-//  Created by Khoa Doan on 1/7/16.
-//  Copyright © 2016 Khoa Doan. All rights reserved.
-//
-
+#include <stdio.h>
+#include <stdlib.h>
 #include "pcb.h"
 
 /*
- * Function:  pcbConstructor
+ * Function:  PCB_constructor
  * --------------------
- * constructs a pcb object, returning a pointer to the pcb object
+ * Constructs a pcb object, returning a pointer to the pcb object
  * in the heap
  *
- *  params:     pID processID
- *              priority priority level of the process. Lower number, higher priority.
- *  returns: 	PCB_p pointer to the PCB object in the heap
+ *  returns: PCB_p pointer to the PCB object in the heap
  */
-
-PCB_p pcbConstructor(int pID, int priority, enum state_type s, int addPC, int addSp) {
+PCB_p PCB_Constructor(int pID, int priority, enum state_type s, int addPC, int addSp) {
     PCB_p result = (PCB_p) malloc(sizeof(PCB));
     if (result != (PCB_p) NULL) {
         result->process_num = pID;
@@ -31,19 +23,64 @@ PCB_p pcbConstructor(int pID, int priority, enum state_type s, int addPC, int ad
 }
 
 /*
- * Function:  queueDestructor
+ * Function:  PCB_destructor
  * --------------------
- * releases resources of PCB object
+ * Deallocates the memory being used by the passed PCB pointer.
  *
- *  params: 	PCB_QUEUE_STR_p me
+ *  params: PCB_p pointer to the PCB object in the heap
  */
-void pcbDestructor(PCB_p me) {
-    free(me);
+void PCB_destructor(PCB_p p) {
+	free(p);
 }
 
-char* pcb_toString(PCB_p me) {
-    char * result = (char *) malloc(sizeof(char) * 1000);
-    sprintf(result, "content: PID: %d, Priority: %d, State: %d, PC: 0x%04X, etc.\n",
-            me->process_num, me->priority_num, me->state, me->addressPC);
-    return result;
+/*
+ * Function:  PCB_setProcessNumber
+ * --------------------
+ * Sets the passed PCB object's process_num field to the passed process number.
+ *
+ *  params: PCB_p pointer to the PCB object in the heap and the designated process number.
+ */
+void PCB_setProcessNumber(PCB_p p, int process_num) {
+	p->process_num = process_num;
 }
+
+int PCB_getProcessNumber(PCB_p p) {
+	return p->process_num;
+}
+
+/*
+ * Function:  PCB_setPriority
+ * --------------------
+ * Sets the passed PCB object's priority field to the passed priority.
+ *
+ *  params: PCB_p pointer to the PCB object in the heap and the designated priority.
+ */
+void PCB_setPriority(PCB_p p, int priority) {
+	p->priority = priority;
+}
+
+/*
+ * Function:  PCB_getPriority
+ * --------------------
+ * Gets the passed PCB object's priority.
+ *
+ *  returns: The PCB object's priority.
+ */
+int PCB_getPriority(PCB_p p) {
+	return p->priority;
+}
+
+/*
+ * Function:  PCB_toString
+ * --------------------
+ * Prints relevant information about the PCB object to the console for
+ * testing/debugging purposes.
+ *
+ * params:	PCB_p pointer to the PCB object in the heap.
+ */
+ char* PCB_toString(PCB_p me) {
+     char * result = (char *) malloc(sizeof(char) * 1000);
+     sprintf(result, "content: PID: %d, Priority: %d, State: %d, PC: 0x%04X, etc.\n",
+             me->process_num, me->priority_num, me->state, me->addressPC);
+     return result;
+ }
