@@ -8,7 +8,7 @@ enum state_type {new, ready, running, waiting, halted};
 
 typedef struct pcb_type {
 	int process_num;
-	int priority_num;
+	int priority;
     enum state_type state;
     int addressPC;
     int addressSpace;
@@ -17,6 +17,7 @@ typedef PCB *PCB_p;
 
 /* Prototypes */
 PCB_p PCB_constructor(int, int, enum state_type, int, int);
+PCB_p PCB_constructorWithEmpty(void);
 void PCB_destructor(PCB_p);
 void PCB_setProcessNumber(PCB_p, int);
 int PCB_getProcessNumber(PCB_p);

@@ -8,18 +8,28 @@
  * Constructs a pcb object, returning a pointer to the pcb object
  * in the heap
  *
+ *  params:  pID processID
+ *			 priority
+ *			 s
+ *			 addPC
+ *			 addSp
  *  returns: PCB_p pointer to the PCB object in the heap
  */
-PCB_p PCB_Constructor(int pID, int priority, enum state_type s, int addPC, int addSp) {
+PCB_p PCB_constructor(int pID, int priority, enum state_type s, int addPC, int addSp) {
     PCB_p result = (PCB_p) malloc(sizeof(PCB));
     if (result != (PCB_p) NULL) {
         result->process_num = pID;
-        result->priority_num = priority;
+        result->priority = priority;
         result->state = s;
         result->addressPC = addPC;
         result->addressSpace = addSp;
     }
     return result;
+}
+
+PCB_p PCB_constructorWithEmpty() {
+	PCB_p result = (PCB_p) malloc(sizeof(PCB));
+	return result;
 }
 
 /*
@@ -81,6 +91,6 @@ int PCB_getPriority(PCB_p p) {
  char* PCB_toString(PCB_p me) {
      char * result = (char *) malloc(sizeof(char) * 1000);
      sprintf(result, "content: PID: %d, Priority: %d, State: %d, PC: 0x%04X, etc.\n",
-             me->process_num, me->priority_num, me->state, me->addressPC);
+             me->process_num, me->priority, me->state, me->addressPC);
      return result;
  }
