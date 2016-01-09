@@ -3,7 +3,6 @@
 
 #include "pcb.h"
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
 //inner class
@@ -38,6 +37,6 @@ NODE_STR_p dequeue(PCB_QUEUE_STR_p);
 
 PCB_p getPCB(NODE_STR_p);
 
-char * toString(PCB_QUEUE_STR_p);
+char * queue_toString(PCB_QUEUE_STR_p);
 
 #endif 

@@ -174,12 +174,12 @@ NODE_STR_p dequeue(PCB_QUEUE_STR_p this){
 	return return_node_p;
 }
 
-char * toString(PCB_QUEUE_STR_p this) {
+char * queue_toString(PCB_QUEUE_STR_p this) {
     char * result = (char *) malloc(sizeof(char) * 1000);
     strcpy(result, "Q: ");
     NODE_STR_p cur = this->head_node;
     if (cur != NULL) {
-        char pID[5];
+        char pID[50] = "";
         sprintf(pID, "P%d", cur->pcb_addr->process_num);
         strcat(result, pID);
         cur = cur->next_node;

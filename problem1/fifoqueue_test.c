@@ -6,9 +6,8 @@
 //  Copyright © 2016 Khoa Doan. All rights reserved.
 //
 
-#include <stdio.h>
 #include "fifoqueue.h"
-
+#include <time.h>
 
 /*********************************************************************
  * Function:  test Main()
@@ -21,13 +20,14 @@
  *********************************************************************/
 int main() {
     printf("FIFO Queue Test\n");
+    srand((unsigned) time(NULL));
     PCB_p process1 = (PCB_p) malloc(sizeof(PCB));
     PCB_p process2 = (PCB_p) malloc(sizeof(PCB));
     PCB_p process3 = (PCB_p) malloc(sizeof(PCB));
     
-    process1 = pcbConstructor(1, 0);
-    process2 = pcbConstructor(2, 12);
-    process3 = pcbConstructor(3, 20);
+    process1 = pcbConstructor(rand() % 31, rand() % 16, 0, 0, 0);
+    process2 = pcbConstructor(rand() % 31, rand() % 16, 1, 10, 5);
+    process3 = pcbConstructor(rand() % 31, rand() % 16, 1, 255, 10);
     
     NODE_STR_p node1 = (NODE_STR_p) malloc(sizeof(NODE_STR));
     NODE_STR_p node2 = (NODE_STR_p) malloc(sizeof(NODE_STR));
@@ -41,13 +41,13 @@ int main() {
     fifoQueue = queueConstructor();
     
     // TODO print the contents of the last pcb enqueued. 
-    puts(toString(fifoQueue));
+    puts(queue_toString(fifoQueue));
     enqueue(fifoQueue, node1);
-    puts(toString(fifoQueue));
+    printf("%s : %s", queue_toString(fifoQueue), pcb_toString(node1->pcb_addr));
     enqueue(fifoQueue, node2);
-    puts(toString(fifoQueue));
+    printf("%s : %s", queue_toString(fifoQueue), pcb_toString(node2->pcb_addr));
     enqueue(fifoQueue, node3);
-    puts(toString(fifoQueue));
+    printf("%s : %s", queue_toString(fifoQueue), pcb_toString(node3->pcb_addr));
     
     exit(0);
 }
