@@ -8,7 +8,7 @@
 #include "fifoqueue.h"
 
 /* (Inner Class)
- * Function:  nodeConstructor
+ * Function:  NODE_constructor
  * --------------------
  * constructs a node object which contains the PCB address and pointer
  * to the next node in the FIFO queue
@@ -16,7 +16,7 @@
  *  params: 	PCB_p pointer to underlying PCB
  *  returns: 	NODE_STR_p pointer to node object
  */
-NODE_STR_p nodeConstructor(PCB_p pcb_pointer){
+NODE_STR_p NODE_constructor(PCB_p pcb_pointer){
 	
 	NODE_STR_p node_pointer = (NODE_STR_p) malloc(sizeof(NODE_STR));
 
@@ -32,7 +32,7 @@ NODE_STR_p nodeConstructor(PCB_p pcb_pointer){
 
 
 /* (Inner Class)
- * Function:  nodeDestructor
+ * Function:  NODE_destructor
  * --------------------
  * constructs a FIFO queue object, returning a pointer to the queue object
  * in the heap
@@ -40,14 +40,14 @@ NODE_STR_p nodeConstructor(PCB_p pcb_pointer){
  *  params: 	NODE_STR_p pointer to node that will be destroyed
  *  returns: 	int function exit status code
  */
-void nodeDestructor(NODE_STR_p node_str_p){
+void NODE_destructor(NODE_STR_p node_str_p){
     PCB_destructor(node_str_p->pcb_addr);  // Kyle fixed. Don't forget to free pcb
 	free(node_str_p);
 }
 
 
 /* (Inner Class)
- * Function:  getPCB
+ * Function:  NODE_getPCB
  * --------------------
  * retrieves the pointer to the PCB within the passed in node struct
  *
@@ -55,7 +55,7 @@ void nodeDestructor(NODE_STR_p node_str_p){
  *  params: 	NODE_STR_p pointer to node object containing PCB pointer
  *  returns:	PCB_p pointer to PCB retrieved from node object
  */
-PCB_p getPCB(NODE_STR_p node_str_p){
+PCB_p NODE_getPCB(NODE_STR_p node_str_p){
 
 	PCB_p pcb_pointer = node_str_p->pcb_addr;
 
@@ -72,14 +72,14 @@ PCB_p getPCB(NODE_STR_p node_str_p){
 
 
 /*
- * Function:  queueConstructor
+ * Function:  FIFO_constructor
  * --------------------
  * constructs a FIFO queue object, returning a pointer to the queue object
  * in the heap
  *
  *  returns: 	PCB_QUEUE_STR_p pointer to the queue object in the heap
  */
-PCB_QUEUE_STR_p queueConstructor(void) {
+PCB_QUEUE_STR_p FIFO_constructor(void) {
 
 	PCB_QUEUE_STR_p queue_pointer = (PCB_QUEUE_STR_p) malloc(sizeof(PCB_QUEUE_STR));
 
@@ -93,7 +93,7 @@ PCB_QUEUE_STR_p queueConstructor(void) {
 
 
 /*
- * Function:  queueDestructor
+ * Function:  FIFO_destructor
  * --------------------
  * releases resources of FIFO queue object
  * also destroys all PCB objects contained within the FIFO queue object
@@ -102,7 +102,7 @@ PCB_QUEUE_STR_p queueConstructor(void) {
  *  params: 	PCB_QUEUE_STR_p this
  *  returns:	int number of nodes released(freed)
  */
-int queueDestructor(PCB_QUEUE_STR_p this){
+int FIFO_destructor(PCB_QUEUE_STR_p this){
 
 	int freed_nodes;
 	freed_nodes = 0;
@@ -117,17 +117,16 @@ int queueDestructor(PCB_QUEUE_STR_p this){
 //	}
     
     while (this->head_node != NULL) {
-        nodeDestructor(dequeue(this)); // freeing node by using destructor function.
+        NODE_destructor(FIFO_dequeue(this)); // freeing node by using destructor function.
         freed_nodes++;
     }
-
 	return freed_nodes;
 
 }
 
 
 /*
- * Function:  enqueue
+ * Function:  FIFO_enqueue
  * --------------------
  * adds a PCB node to the tail end of the FIFO queue
  *
@@ -136,9 +135,9 @@ int queueDestructor(PCB_QUEUE_STR_p this){
  * 				NODE_STR_p that will be added at the tail end of the queue
  *  returns:	int function exit status code
  */
-int enqueue(PCB_QUEUE_STR_p this, PCB_p pcb_p){
+int FIFO_enqueue(PCB_QUEUE_STR_p this, PCB_p pcb_p){
     
-    NODE_STR_p node_pointer = nodeConstructor(pcb_p);
+    NODE_STR_p node_pointer = NODE_constructor(pcb_p);
     
 	//if num of nodes in this is 0, set passed in node as head and tail
 	if (this->num_nodes == 0) {
@@ -157,16 +156,15 @@ int enqueue(PCB_QUEUE_STR_p this, PCB_p pcb_p){
 
 
 /*
- * Function:  queueDestructor
+ * Function:  FIFO_dequeue
  * --------------------
- * releases resources of FIFO queue object
- * also destroys all PCB objects contained within the FIFO queue object
+ * Removes the
  *
  *
  *  params: 	PCB_QUEUE_STR_p this
  *  returns:	NODE_STR_p head node that will be taken off the queue
  */
-NODE_STR_p dequeue(PCB_QUEUE_STR_p this){
+NODE_STR_p FIFO_dequeue(PCB_QUEUE_STR_p this){
 
 	NODE_STR_p return_node_p = this->head_node;
 
@@ -183,7 +181,7 @@ NODE_STR_p dequeue(PCB_QUEUE_STR_p this){
 	return return_node_p;
 }
 
-char * queue_toString(PCB_QUEUE_STR_p this) {
+char * FIFO_toString(PCB_QUEUE_STR_p this) {
     char * result = (char *) malloc(sizeof(char) * 1000);
     strcpy(result, "Q: ");
     NODE_STR_p cur = this->head_node;

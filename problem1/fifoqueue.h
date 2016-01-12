@@ -34,16 +34,16 @@ typedef struct pcb_queue_str {
 typedef PCB_QUEUE_STR * PCB_QUEUE_STR_p;
 
 //prototypes
-NODE_STR_p nodeConstructor(PCB_p);
-void nodeDestructor(NODE_STR_p);
+NODE_STR_p NODE_constructor(PCB_p);
+void NODE_destructor(NODE_STR_p);
 
-PCB_QUEUE_STR_p queueConstructor(void);
-int queueDestructor(PCB_QUEUE_STR_p);
-int enqueue(PCB_QUEUE_STR_p, PCB_p);
-NODE_STR_p dequeue(PCB_QUEUE_STR_p);
+PCB_QUEUE_STR_p FIFO_constructor(void);
+int FIFO_destructor(PCB_QUEUE_STR_p);
+int FIFO_enqueue(PCB_QUEUE_STR_p, PCB_p);
+NODE_STR_p FIFO_dequeue(PCB_QUEUE_STR_p);
 
-PCB_p getPCB(NODE_STR_p);
+PCB_p NODE_getPCB(NODE_STR_p);
 
-char * queue_toString(PCB_QUEUE_STR_p);
+char * FIFO_toString(PCB_QUEUE_STR_p);
 
 #endif 

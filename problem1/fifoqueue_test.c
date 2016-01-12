@@ -28,16 +28,16 @@ int main() {
     process3 = PCB_constructor(rand() / (RAND_MAX / 31), rand() / (RAND_MAX / 16), 1, 255, 10);
 
     PCB_QUEUE_STR_p fifoQueue = (PCB_QUEUE_STR_p) malloc(sizeof(PCB_QUEUE_STR));
-    fifoQueue = queueConstructor();
+    fifoQueue = FIFO_constructor();
 
     // TODO print the contents of the last pcb enqueued.
-    puts(queue_toString(fifoQueue));
-    enqueue(fifoQueue, process1);
-    printf("%s : %s", queue_toString(fifoQueue), PCB_toString(process1));
-    enqueue(fifoQueue, process2);
-    printf("%s : %s", queue_toString(fifoQueue), PCB_toString(process2));
-    enqueue(fifoQueue, process3);
-    printf("%s : %s", queue_toString(fifoQueue), PCB_toString(process3));
+    puts(FIFO_toString(fifoQueue));
+    FIFO_enqueue(fifoQueue, process1);
+    printf("%s : %s", FIFO_toString(fifoQueue), PCB_toString(process1));
+    FIFO_enqueue(fifoQueue, process2);
+    printf("%s : %s", FIFO_toString(fifoQueue), PCB_toString(process2));
+    FIFO_enqueue(fifoQueue, process3);
+    printf("%s : %s", FIFO_toString(fifoQueue), PCB_toString(process3));
 
     exit(0);
 }
