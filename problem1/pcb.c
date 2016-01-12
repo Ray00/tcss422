@@ -1,5 +1,5 @@
 /*
- * pcb_test.c
+ * pcb.c
  *
  *  Created on: Jan 7, 2016
  *      Author: Kyle Doan, nabilfadili

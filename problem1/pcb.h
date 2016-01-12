@@ -1,10 +1,17 @@
+/*
+ * pcb_test.h
+ *
+ *  Created on: Jan 9, 2016
+ *      Author: Kyle Doan, nabilfadili
+ */
+
 #ifndef PCB_H
 #define PCB_H
 
 #include <stdlib.h>
 #include <stdio.h>
 
-#define NUMREGS 16
+//#define NUMREGS 16
 
 enum state_type {new, ready, running, waiting, halted};
 
@@ -13,7 +20,7 @@ typedef struct pcb_type {
 	unsigned int priority;      /* extrinsic property */
     enum state_type state;      /* current state */
     unsigned int addressPC;     /* where to resume */
-    int reg_file[NUMREGS];      /* contents of GPRs */
+//    int reg_file[NUMREGS];      /* contents of GPRs */
     unsigned int addressSpace;  /* where in memory */
 } PCB;
 typedef PCB *PCB_p;

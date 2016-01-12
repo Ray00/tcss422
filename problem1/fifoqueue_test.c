@@ -1,6 +1,5 @@
 //
 //  fifoqueue_test.c
-//  testC
 //
 //  Created by Khoa Doan on 1/7/16.
 //  Copyright © 2016 Khoa Doan. All rights reserved.
