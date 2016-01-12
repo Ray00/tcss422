@@ -41,7 +41,8 @@ NODE_STR_p NODE_constructor(PCB_p pcb_pointer){
  *  returns: 	int function exit status code
  */
 void NODE_destructor(NODE_STR_p node_str_p){
-    PCB_destructor(node_str_p->pcb_addr);  // Kyle fixed. Don't forget to free pcb
+    //PCB_destructor(node_str_p->pcb_addr);  // Kyle fixed. Don't forget to free pcb
+    free(node_str_p->pcb_addr);
 	free(node_str_p);
 }
 
@@ -93,7 +94,8 @@ int FIFO_destructor(PCB_QUEUE_STR_p this){
 //	}
     
     while (this->head_node != NULL) {
-        NODE_destructor(FIFO_dequeue(this)); // freeing node by using destructor function.
+        free(FIFO_dequeue(this)); // freeing node by using destructor function.
+        
         freed_nodes++;
     }
 	return freed_nodes;
@@ -122,6 +124,7 @@ int FIFO_enqueue(PCB_QUEUE_STR_p this, PCB_p pcb_p){
         this->free_node = NULL;
         
         node_pointer->pcb_addr = pcb_p; //save pcb to free_node
+        node_pointer->next_node = NULL;
     } else {
         node_pointer = NODE_constructor(pcb_p);
     }
