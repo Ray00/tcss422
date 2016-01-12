@@ -4,24 +4,27 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define NUMREGS 16
+
 enum state_type {new, ready, running, waiting, halted};
 
 typedef struct pcb_type {
-	int process_num;
-	int priority;
-    enum state_type state;
-    int addressPC;
-    int addressSpace;
+	unsigned int process_num;
+	unsigned int priority;      /* extrinsic property */
+    enum state_type state;      /* current state */
+    unsigned int addressPC;     /* where to resume */
+    int reg_file[NUMREGS];      /* contents of GPRs */
+    unsigned int addressSpace;  /* where in memory */
 } PCB;
 typedef PCB *PCB_p;
 
 /* Prototypes */
-PCB_p PCB_constructor(int, int, enum state_type, int, int);
+PCB_p PCB_constructor(unsigned int, unsigned int, enum state_type, unsigned int, unsigned int);
 PCB_p PCB_constructorWithEmpty(void);
 void PCB_destructor(PCB_p);
-void PCB_setProcessNumber(PCB_p, int);
+void PCB_setProcessNumber(PCB_p, unsigned int);
 int PCB_getProcessNumber(PCB_p);
-void PCB_setPriority(PCB_p, int);
+void PCB_setPriority(PCB_p, unsigned int);
 int PCB_getPriority(PCB_p);
 char * PCB_toString(PCB_p);
 

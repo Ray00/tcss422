@@ -1,3 +1,10 @@
+/*
+ * pcb_test.c
+ *
+ *  Created on: Jan 7, 2016
+ *      Author: Kyle Doan, nabilfadili
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "pcb.h"
@@ -15,7 +22,7 @@
  *			 addSp
  *  returns: PCB_p pointer to the PCB object in the heap
  */
-PCB_p PCB_constructor(int pID, int priority, enum state_type s, int addPC, int addSp) {
+PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp) {
     PCB_p result = (PCB_p) malloc(sizeof(PCB));
     if (result != (PCB_p) NULL) {
         result->process_num = pID;
@@ -50,7 +57,7 @@ void PCB_destructor(PCB_p p) {
  *
  *  params: PCB_p pointer to the PCB object in the heap and the designated process number.
  */
-void PCB_setProcessNumber(PCB_p p, int process_num) {
+void PCB_setProcessNumber(PCB_p p, unsigned int process_num) {
 	p->process_num = process_num;
 }
 
@@ -65,7 +72,7 @@ int PCB_getProcessNumber(PCB_p p) {
  *
  *  params: PCB_p pointer to the PCB object in the heap and the designated priority.
  */
-void PCB_setPriority(PCB_p p, int priority) {
+void PCB_setPriority(PCB_p p, unsigned int priority) {
 	p->priority = priority;
 }
 

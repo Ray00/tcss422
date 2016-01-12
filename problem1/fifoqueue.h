@@ -1,3 +1,10 @@
+/*
+ * pcb_test.c
+ *
+ *  Created on: Jan 7, 2016
+ *      Author: Ray Kim
+ */
+
 #ifndef FIFO_QUEUE_H
 #define FIFO_QUEUE_H
 
@@ -20,7 +27,7 @@ typedef NODE_STR * NODE_STR_p;
 typedef struct pcb_queue_str {
 	NODE_STR_p head_node;
 	NODE_STR_p tail_node;
-	int num_nodes;
+	unsigned int num_nodes;
 	
 } PCB_QUEUE_STR;
 
@@ -32,7 +39,7 @@ void nodeDestructor(NODE_STR_p);
 
 PCB_QUEUE_STR_p queueConstructor(void);
 int queueDestructor(PCB_QUEUE_STR_p);
-int enqueue(PCB_QUEUE_STR_p, NODE_STR_p);
+int enqueue(PCB_QUEUE_STR_p, PCB_p);
 NODE_STR_p dequeue(PCB_QUEUE_STR_p);
 
 PCB_p getPCB(NODE_STR_p);

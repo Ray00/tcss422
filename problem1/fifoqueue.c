@@ -1,3 +1,10 @@
+/*
+ * pcb_test.c
+ *
+ *  Created on: Jan 7, 2016
+ *      Author: Ray Kim
+ */
+
 #include "fifoqueue.h"
 
 /* (Inner Class)
@@ -129,8 +136,10 @@ int queueDestructor(PCB_QUEUE_STR_p this){
  * 				NODE_STR_p that will be added at the tail end of the queue
  *  returns:	int function exit status code
  */
-int enqueue(PCB_QUEUE_STR_p this, NODE_STR_p node_pointer){
-
+int enqueue(PCB_QUEUE_STR_p this, PCB_p pcb_p){
+    
+    NODE_STR_p node_pointer = nodeConstructor(pcb_p);
+    
 	//if num of nodes in this is 0, set passed in node as head and tail
 	if (this->num_nodes == 0) {
 		this->head_node = node_pointer;
