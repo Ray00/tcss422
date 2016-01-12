@@ -28,6 +28,7 @@ typedef struct pcb_queue_str {
 	NODE_STR_p head_node;
 	NODE_STR_p tail_node;
 	unsigned int num_nodes;
+    NODE_STR_p free_node;
 	
 } PCB_QUEUE_STR;
 
@@ -40,9 +41,8 @@ void NODE_destructor(NODE_STR_p);
 PCB_QUEUE_STR_p FIFO_constructor(void);
 int FIFO_destructor(PCB_QUEUE_STR_p);
 int FIFO_enqueue(PCB_QUEUE_STR_p, PCB_p);
-NODE_STR_p FIFO_dequeue(PCB_QUEUE_STR_p);
+PCB_p FIFO_dequeue(PCB_QUEUE_STR_p);
 
-PCB_p NODE_getPCB(NODE_STR_p);
 
 char * FIFO_toString(PCB_QUEUE_STR_p);
 
