@@ -2,60 +2,91 @@
 //  priorityqueue_test.c
 //  422 Problem 1
 //
-//  Created by Riley Gratzer on 1/12/16.
+//  Created by Riley Gratzer on 1/12/16. Modified by Ray Kim on 1/13/16
 //  Copyright © 2016 Riley Gratzer. All rights reserved.
 //
 
 #include <stdio.h>
+#include <time.h>
+#include <unistd.h>
 #include "priorityqueue.h"
 
 int main(int argc, const char * argv[]) {
+    srand((unsigned) time(NULL));
+    unsigned int random_num_range_4_to_6;
+    unsigned int pcbs_remain = 1;
     
-    PriorityQueue_p testing = PriorityQueue_constructor();
-    PCB_p process1 = PCB_constructor(1, 2, ready, 0, 0);
-    PCB_p process2 = PCB_constructor(2, 3, ready, 0, 0);
-    PCB_p process3 = PCB_constructor(3, 1, ready, 0, 0);
-    PCB_p process4 = PCB_constructor(4, 0, ready, 0, 0);
-    PCB_p process5 = PCB_constructor(5, 0, ready, 0, 0);
-    PCB_p process6 = PCB_constructor(6, 13, ready, 0, 0);
-    PCB_p process7 = PCB_constructor(7, 0, ready, 0, 0);
-    PCB_p process8 = PCB_constructor(8, 11, ready, 0, 0);
-    PCB_p process9 = PCB_constructor(9, 11, ready, 0, 0);
-    priority_enqueue(testing, process1);
-    priority_enqueue(testing, process2);
-    priority_enqueue(testing, process3);
-    priority_enqueue(testing, process4);
-    priority_enqueue(testing, process5);
-    priority_enqueue(testing, process6);
-    priority_enqueue(testing, process7);
-    priority_enqueue(testing, process8);
-    priority_enqueue(testing, process9);
+    PriorityQueue_p priority_queue = PriorityQueue_constructor();
     
-    printf("Visulization of Processes in Ready Queue:\n");
-    printf("%s", PriorityQueue_toString(testing));
+    char * dequeued_pcbs = (char *) malloc(sizeof(char) * 1000);
+    printf("Visualization of Processes in Ready Queue:\n");
     
-    printf("\nRemoving Processes from Ready Queue by priority...\n");
     
-    PCB_p retrieval = priority_dequeue(testing);
-    printf("%s", PCB_toString(retrieval));
-    retrieval = priority_dequeue(testing);
-    printf("%s", PCB_toString(retrieval));
-    retrieval = priority_dequeue(testing);
-    printf("%s", PCB_toString(retrieval));
-    retrieval = priority_dequeue(testing);
-    printf("%s", PCB_toString(retrieval));
-    retrieval = priority_dequeue(testing);
-    printf("%s", PCB_toString(retrieval));
-    retrieval = priority_dequeue(testing);
-    printf("%s", PCB_toString(retrieval));
-    retrieval = priority_dequeue(testing);
-    printf("%s", PCB_toString(retrieval));
-    retrieval = priority_dequeue(testing);
-    printf("%s", PCB_toString(retrieval));
-    retrieval = priority_dequeue(testing);
-    printf("%s", PCB_toString(retrieval));
+    int i;
+    int j;
+    int k;
+    for (i = 0; i < 10; i++) {
+        //generate pcbs with random priorities and enqueue them into priority_queue
+        for (j = 0; j < 10; j++) {
+            //creating and populating the new pcbs
+            PCB_p temp_pcb = (PCB_p) malloc(sizeof(PCB));
+            temp_pcb = PCB_constructor((i*10 + j), rand() / (RAND_MAX / 16), 0, 0, 0);
+            
+            //enqueue pcbs
+            priority_enqueue(priority_queue, temp_pcb);
 
-    PriorityQueue_destructor(testing);
+        }
+        
+        //generate random between 4 and 6
+        random_num_range_4_to_6 = (rand() / (RAND_MAX / 2)) + 4;
+
+        //dequeue 4-6 items
+        for (k = 0; k < random_num_range_4_to_6; k++) {
+            PCB_p dequeued_pcb_p = priority_dequeue(priority_queue);
+            strcat(dequeued_pcbs, PCB_toString(dequeued_pcb_p));
+        }
+        strcat(dequeued_pcbs, "\n\n");
+        
+        //print the state of the priority queue
+        printf("%s", PriorityQueue_toString(priority_queue));
+        
+        //print dequeued pcbs
+        puts(dequeued_pcbs);
+        
+        dequeued_pcbs[0] = '\0'; //clear out char * that holds dequeued pcbs
+        
+        //sleep for 10 seconds
+        sleep(1);
+    }
+    
+    //empty out the remaining pcbs
+    while (pcbs_remain) {
+        //set next random number of pcbs to dequeue
+        random_num_range_4_to_6 = (rand() / (RAND_MAX / 2)) + 4;
+        
+        for (k = 0; k < random_num_range_4_to_6; k++) {
+            PCB_p dequeued_pcb_p = priority_dequeue(priority_queue);
+            
+            //upon receiving NULL PCB pointer, break
+            if (dequeued_pcb_p == NULL) {
+                pcbs_remain = 0;
+                break;
+            }
+            strcat(dequeued_pcbs, PCB_toString(dequeued_pcb_p));
+        }
+        strcat(dequeued_pcbs, "\n\n");
+        
+        //print dequeued pcbs
+        puts(dequeued_pcbs);
+        
+        dequeued_pcbs[0] = '\0'; //clear out char * that holds dequeued pcbs
+        
+        //sleep for 10 seconds
+        sleep(1);
+    }
+
+
+    PriorityQueue_destructor(priority_queue);
     
     return 0;
 }

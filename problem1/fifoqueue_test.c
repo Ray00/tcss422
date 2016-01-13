@@ -1,7 +1,7 @@
 //
 //  fifoqueue_test.c
 //
-//  Created by Khoa Doan on 1/7/16.
+//  Created by Khoa Doan on 1/7/16. Modified by Ray Kim on 1/13/16
 //  Copyright © 2016 Khoa Doan. All rights reserved.
 //
 
@@ -17,27 +17,50 @@
  *  params: 	PCB_QUEUE_STR_p this
  *  returns:	NODE_STR_p head node that will be taken off the queue
  *********************************************************************/
-//int main() {
+//int main(int argc, const char * argv[]) {
 //    printf("FIFO Queue Test\n");
 //    srand((unsigned) time(NULL));
-//    PCB_p process1 = (PCB_p) malloc(sizeof(PCB));
-//    PCB_p process2 = (PCB_p) malloc(sizeof(PCB));
-//    PCB_p process3 = (PCB_p) malloc(sizeof(PCB));
-//    process1 = PCB_constructor(rand() / (RAND_MAX / 31), rand() / (RAND_MAX / 16), 0, 0, 0);
-//    process2 = PCB_constructor(rand() / (RAND_MAX / 31), rand() / (RAND_MAX / 16), 1, 10, 5);
-//    process3 = PCB_constructor(rand() / (RAND_MAX / 31), rand() / (RAND_MAX / 16), 1, 255, 10);
 //
+//    //Create a queue object
 //    PCB_QUEUE_STR_p fifoQueue = (PCB_QUEUE_STR_p) malloc(sizeof(PCB_QUEUE_STR));
 //    fifoQueue = FIFO_constructor();
 //
-//    // TODO print the contents of the last pcb enqueued.
-//    puts(FIFO_toString(fifoQueue));
-//    FIFO_enqueue(fifoQueue, process1);
-//    printf("%s : %s", FIFO_toString(fifoQueue), PCB_toString(process1));
-//    FIFO_enqueue(fifoQueue, process2);
-//    printf("%s : %s", FIFO_toString(fifoQueue), PCB_toString(process2));
-//    FIFO_enqueue(fifoQueue, process3);
-//    printf("%s : %s", FIFO_toString(fifoQueue), PCB_toString(process3));
+//    unsigned int i;
+//    unsigned int random_num_within_20 = rand() / (RAND_MAX / 20);
+//    unsigned int random_within_range = random_num_within_20 + 10; //between 10-30
+//
+//    PCB_QUEUE_STR_p fifo_queue = FIFO_constructor();
+//
+//    //creation of a random number of PCBs (between 10 and 30)
+//    for (i = 0; i < random_within_range; i++) {
+//        //creating and populating the new pcbs
+//        PCB_p temp_pcb = (PCB_p) malloc(sizeof(PCB));
+//        temp_pcb = PCB_constructor(i, rand() / (RAND_MAX / 16), 0, 0, 0);
+//
+//        //enqueue into fifo queue
+//        FIFO_enqueue(fifo_queue, temp_pcb);
+//
+//        //print out a representation of the queue as it grows
+//        //pcb linked list
+//        printf("Q: %s :", FIFO_toString(fifo_queue));
+//
+//        //added pcb
+//        puts(PCB_toString(temp_pcb));
+//    }
+//
+//    //dequeueing
+//    while (fifo_queue->num_nodes > 0) {
+//        PCB_p dequeued_pcb = FIFO_dequeue(fifo_queue);
+//
+//        //print out the queue with each dequeue
+//        printf("Q: %s\n", FIFO_toString(fifo_queue));
+//
+//        //print the contents of the pcb object just dequeued
+//        puts(PCB_toString(dequeued_pcb));
+//    }
+//
+//    //destroy fifo_queue
+//    FIFO_destructor(fifo_queue);
 //
 //    exit(0);
 //}

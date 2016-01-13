@@ -57,11 +57,15 @@ PCB_p priority_dequeue(PriorityQueue_p this) {
 char * PriorityQueue_toString(PriorityQueue_p this) {
     char * result = (char *) malloc(sizeof(char) * 16000);
     char * temp = (char *) malloc(sizeof(char) * 1000);
+    char * queue_num = (char *) malloc(sizeof(char) * 5);
     int i = 0;
     for (i = 0; i < 16; i++) {
+        sprintf(queue_num, "Q%i: ", i);
+        strcat(result, queue_num);
         temp = FIFO_toString(this->queueArray[i]);
         strcat(result, temp);
         strcat(result, "\n");
     }
+    strcat(result, "\n\n");
     return result;
 }
