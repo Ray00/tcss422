@@ -158,12 +158,14 @@ int FIFO_enqueue(PCB_QUEUE_STR_p this, PCB_p pcb_p){
 PCB_p FIFO_dequeue(PCB_QUEUE_STR_p this){
 
 	NODE_STR_p return_node_p = this->head_node;
-    PCB_p return_pcb_p = return_node_p->pcb_addr;
+    PCB_p return_pcb_p = NULL;
     
 	//return NULL if queue is empty
 	if (this->num_nodes < 1 || return_node_p == NULL) {
 		return NULL;
-	}
+    } else {
+        return_pcb_p = return_node_p->pcb_addr;
+    }
 
 	this->head_node = return_node_p->next_node;
 
