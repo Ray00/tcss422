@@ -195,7 +195,6 @@ PCB_p FIFO_dequeue(PCB_QUEUE_STR_p this){
  */
 char * FIFO_toString(PCB_QUEUE_STR_p this) {
     char * result = (char *) malloc(sizeof(char) * 1000);
-    strcpy(result, "Q: ");
     NODE_STR_p cur = this->head_node;
     if (cur != NULL) {
         char pID[50] = "";
