@@ -40,11 +40,11 @@ NODE_STR_p NODE_constructor(PCB_p pcb_pointer){
  *  params: 	NODE_STR_p pointer to node that will be destroyed
  *  returns: 	int function exit status code
  */
-void NODE_destructor(NODE_STR_p node_str_p){
-    //PCB_destructor(node_str_p->pcb_addr);  // Kyle fixed. Don't forget to free pcb
-    free(node_str_p->pcb_addr);
-	free(node_str_p);
-}
+//void NODE_destructor(NODE_STR_p node_str_p){
+//    //PCB_destructor(node_str_p->pcb_addr);  // Kyle fixed. Don't forget to free pcb
+//    free(node_str_p->pcb_addr);
+//	free(node_str_p);
+//}
 
 
 /*

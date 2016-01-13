@@ -58,15 +58,9 @@ int main() {
         //print the contents of the pcb object just dequeued
         puts(PCB_toString(dequeued_pcb));
     }
-
-    // TODO print the contents of the last pcb enqueued.
-//    puts(FIFO_toString(fifoQueue));
-//    FIFO_enqueue(fifoQueue, process1);
-//    printf("%s : %s", FIFO_toString(fifoQueue), PCB_toString(process1));
-//    FIFO_enqueue(fifoQueue, process2);
-//    printf("%s : %s", FIFO_toString(fifoQueue), PCB_toString(process2));
-//    FIFO_enqueue(fifoQueue, process3);
-//    printf("%s : %s", FIFO_toString(fifoQueue), PCB_toString(process3));
+    
+    //destroy fifo_queue
+    FIFO_destructor(fifo_queue);
 
     exit(0);
 }
