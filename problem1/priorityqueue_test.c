@@ -19,8 +19,7 @@ int main(int argc, const char * argv[]) {
     PriorityQueue_p priority_queue = PriorityQueue_constructor();
 
     char * dequeued_pcbs = (char *) malloc(sizeof(char) * 1000);
-    printf("Visualization of Processes in Ready Queue:\n");
-
+    printf("---Visualization of Processes in Ready Queue---\n");
 
     int i;
     int j;
@@ -36,6 +35,8 @@ int main(int argc, const char * argv[]) {
             priority_enqueue(priority_queue, PCB_constructor((i*10 + j), rand() / (RAND_MAX / 16), 0, 0, 0));
 
         }
+        //print the state of the priority queue after 10 PCB's are added
+        printf("---Loop %d:---\n%s", i + 1, PriorityQueue_toString(priority_queue));
 
         //generate random between 4 and 6
         random_num_range_4_to_6 = (rand() / (RAND_MAX / 2)) + 4;
@@ -46,10 +47,7 @@ int main(int argc, const char * argv[]) {
             strcat(dequeued_pcbs, "Removed ");
             strcat(dequeued_pcbs, PCB_toString(dequeued_pcb_p));
         }
-        strcat(dequeued_pcbs, "\n\n");
-
-        //print the state of the priority queue
-        printf("%s", PriorityQueue_toString(priority_queue));
+        strcat(dequeued_pcbs, "\n");
 
         //print dequeued pcbs
         puts(dequeued_pcbs);
@@ -57,34 +55,36 @@ int main(int argc, const char * argv[]) {
         dequeued_pcbs[0] = '\0'; //clear out char * that holds dequeued pcbs
 
         //sleep for 10 seconds
-        sleep(1);
+        //sleep(1);
     }
+    //Final state of the priorityqueue
+    printf("\n---Final State of Priority Queue---\n%s", PriorityQueue_toString(priority_queue));
 
     //empty out the remaining pcbs
-    while (pcbs_remain) {
-        //set next random number of pcbs to dequeue
-        random_num_range_4_to_6 = (rand() / (RAND_MAX / 2)) + 4;
-
-        for (k = 0; k < random_num_range_4_to_6; k++) {
-            PCB_p dequeued_pcb_p = priority_dequeue(priority_queue);
-
-            //upon receiving NULL PCB pointer, break
-            if (dequeued_pcb_p == NULL) {
-                pcbs_remain = 0;
-                break;
-            }
-            strcat(dequeued_pcbs, "Removed ");
-            strcat(dequeued_pcbs, PCB_toString(dequeued_pcb_p));
-        }
-        strcat(dequeued_pcbs, "\n\n");
-        //print dequeued pcbs
-        puts(dequeued_pcbs);
-
-        dequeued_pcbs[0] = '\0'; //clear out char * that holds dequeued pcbs
-
-        //sleep for 10 seconds
-        sleep(1);
-    }
+//    while (pcbs_remain) {
+//        //set next random number of pcbs to dequeue
+//        random_num_range_4_to_6 = (rand() / (RAND_MAX / 2)) + 4;
+//
+//        for (k = 0; k < random_num_range_4_to_6; k++) {
+//            PCB_p dequeued_pcb_p = priority_dequeue(priority_queue);
+//
+//            //upon receiving NULL PCB pointer, break
+//            if (dequeued_pcb_p == NULL) {
+//                pcbs_remain = 0;
+//                break;
+//            }
+//            strcat(dequeued_pcbs, "Removed ");
+//            strcat(dequeued_pcbs, PCB_toString(dequeued_pcb_p));
+//        }
+//        strcat(dequeued_pcbs, "\n\n");
+//        //print dequeued pcbs
+//        puts(dequeued_pcbs);
+//
+//        dequeued_pcbs[0] = '\0'; //clear out char * that holds dequeued pcbs
+//
+//        //sleep for 10 seconds
+//        //sleep(1);
+//    }
 
 
     PriorityQueue_destructor(priority_queue);

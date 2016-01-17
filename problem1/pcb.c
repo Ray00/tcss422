@@ -36,6 +36,7 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
 
 PCB_p PCB_constructorWithEmpty() {
 	PCB_p result = (PCB_p) malloc(sizeof(PCB));
+	result->priority = -1;
 	return result;
 }
 
@@ -97,7 +98,7 @@ int PCB_getPriority(PCB_p p) {
  */
  char* PCB_toString(PCB_p me) {
      char * result = (char *) malloc(sizeof(char) * 1000);
-     sprintf(result, "content: PID: %d, Priority: %d, State: %d, PC: 0x%04X, etc.\n",
+     sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %d, PC: 0x%04X, etc.\n",
              me->process_num, me->priority, me->state, me->addressPC);
      return result;
  }
