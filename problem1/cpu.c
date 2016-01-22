@@ -32,16 +32,46 @@ unsigned int CPU_getPC(CPU_p self) {
 	return self->pc;
 }
 
-void CPU_SysStack_push(CPU_p, unsigned int);				//Not really a "push", just overwrites
-unsigned int CPU_SysStack_pop(CPU_p);					//Not really a "pop", just gets the current value
-void CPU_setCurrentProcess(CPU_p, PCB_p);		//Current PCB setter
-PCB_p CPU_getCurrentProcess(CPU_p);				//Current PCB getter
-void CPU_readyQueue_enqueue(CPU_p, PCB_p);		//RQ_enqueue - readyQueue
-PCB_p CPU_readyQueue_dequeue(CPU_p);			//RQ_dequeue - readyQueue
-void CPU_createdQueue_enqueue(CPU_p, PCB_p);	//CQ_enqueue - queue of newly created PCB's
-PCB_p CPU_createdQueue_dequeue(CPU_p);			//CQ_dequeue - queue of newly created PCB's
-void CPU_terminatedQueue_enqueue(CPU_p, PCB_p);	//TQ_enqueue - queue of terminated PCB's
-PCB_p CPU_terminatedQueue_dequeue(CPU_p);		//TQ_dequeue - queue of terminated PCB's
+void CPU_SysStack_push(CPU_p self, unsigned int pc) {
+	self->sysStack = pc;
+}
+
+unsigned int CPU_SysStack_pop(CPU_p self) {
+	return self->sysStack;
+}
+
+void CPU_setCurrentProcess(CPU_p self, PCB_p pcb) {
+	self->currentProcess = pcb;
+}
+
+PCB_p CPU_getCurrentProcess(CPU_p self) {
+	return self->currentProcess;
+}
+
+void CPU_readyQueue_enqueue(CPU_p self, PCB_p pcb) {
+	FIFO_enqueue(self->readyQueue, pcb);
+}
+
+PCB_p CPU_readyQueue_dequeue(CPU_p self) {
+	return FIFO_dequeue(self->readyQueue);
+}
+
+void CPU_createdQueue_enqueue(CPU_p self, PCB_p pcb) {
+	FIFO_enqueue(self->createdQueue, pcb);
+}
+
+PCB_p CPU_createdQueue_dequeue(CPU_p self) {
+	return FIFO_dequeue(self->createdQueue);
+}
+
+void CPU_terminatedQueue_enqueue(CPU_p self, PCB_p pcb) {
+	FIFO_enqueue(self->terminatedQueue, pcb);
+}
+
+PCB_p CPU_terminatedQueue_dequeue(CPU_p self) {
+	return FIFO_dequeue(self->terminatedQueue);
+}
+
 char* CPU_toString(CPU_p self) {
 	char * result = (char *) malloc(sizeof(char) * 1000);
 	sprintf(result, "Current PC: %u\nCurrent sysStack: %d\nCurrent Process: \n"
@@ -56,6 +86,12 @@ int main() {
 	unsigned int testPC = 3000;
 	CPU_setPC(testCPU, testPC);
 	printf("\nsetPC Test: %u", CPU_getPC(testCPU));
+
+	PCB_p testEnqueuePCB = PCB_constructorWithEmpty();
+	CPU_readyQueue_enqueue(testCPU, testEnqueuePCB);
+	PCB_p testDequeuePCB = CPU_readyQueue_dequeue(testCPU);
+	printf("\nDequeue PCB Test: %s\n", PCB_toString(testDequeuePCB));
+
 
 
 	exit(0);

@@ -26,10 +26,10 @@ enum interrupt_type {timer, io};
 /*Construction Prototypes*/
 CPU_p CPU_constructor(void);					//Instantiates CPU struct, including all the queues
 void CPU_destructor(CPU_p);						//Free's all memory related to the passed CPU object
-void CPU_setPC(CPU_p, unsigned int);						//pc setter
-unsigned int CPU_getPC(CPU_p);							//pc getter
-void CPU_SysStack_push(CPU_p, unsigned int);				//Not really a "push", just overwrites
-unsigned int CPU_SysStack_pop(CPU_p);					//Not really a "pop", just gets the current value
+void CPU_setPC(CPU_p, unsigned int);			//pc setter
+unsigned int CPU_getPC(CPU_p);					//pc getter
+void CPU_SysStack_push(CPU_p, unsigned int);	//Not really a "push", just overwrites
+unsigned int CPU_SysStack_pop(CPU_p);			//Not really a "pop", just gets the current value
 void CPU_setCurrentProcess(CPU_p, PCB_p);		//Current PCB setter
 PCB_p CPU_getCurrentProcess(CPU_p);				//Current PCB getter
 void CPU_readyQueue_enqueue(CPU_p, PCB_p);		//RQ_enqueue - readyQueue
