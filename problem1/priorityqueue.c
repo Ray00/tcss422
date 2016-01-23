@@ -13,7 +13,7 @@ PriorityQueue_p PriorityQueue_constructor(void) {
     //If not NULL
     if (prioQ != NULL) {
         int i = 0;
-        for (i = 0; i < 16; i++) {
+        for (i = 0; i < MAX_PRIORITY; i++) {
             prioQ->queueArray[i] = FIFO_constructor();
         }
     //Return NULL if NULL
@@ -43,8 +43,7 @@ void priority_enqueue(PriorityQueue_p this, PCB_p pcb_p) {
 PCB_p priority_dequeue(PriorityQueue_p this) {
 	PCB_p temp = NULL;
 	int i = 0;
-
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < MAX_PRIORITY; i++) {
 		temp = FIFO_dequeue(this->queueArray[i]);
 		if (temp != NULL) {
             return temp;
@@ -59,7 +58,7 @@ char * PriorityQueue_toString(PriorityQueue_p this) {
     char * temp = (char *) malloc(sizeof(char) * 1000);
     char * queue_num = (char *) malloc(sizeof(char) * 5);
     int i = 0;
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < MAX_PRIORITY; i++) {
         sprintf(queue_num, "Q%i: ", i);
         strcat(result, queue_num);
         temp = FIFO_toString(this->queueArray[i]);

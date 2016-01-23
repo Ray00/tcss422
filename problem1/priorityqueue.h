@@ -6,8 +6,10 @@
 #include "fifoqueue.h"
 #include "pcb.h"
 
+#define MAX_PRIORITY 16
+
 typedef struct PriorityQueue {
-  PCB_QUEUE_STR_p queueArray[16];
+  PCB_QUEUE_STR_p queueArray[MAX_PRIORITY];
 } PriorityQueue;
 
 typedef PriorityQueue * PriorityQueue_p;
