@@ -98,6 +98,10 @@ int FIFO_destructor(PCB_QUEUE_STR_p this){
         
         freed_nodes++;
     }
+    
+    //destroy this->free_node
+    free(this->free_node);
+    
 	return freed_nodes;
 
 }
