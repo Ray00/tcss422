@@ -13,7 +13,7 @@
 
 //#define NUMREGS 16
 
-enum state_type {new, ready, running, waiting, halted};
+enum state_type {new, ready, running, blocked, waiting, halted};
 
 typedef struct pcb_type {
 	unsigned int process_num;

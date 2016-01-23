@@ -79,6 +79,49 @@ char* CPU_toString(CPU_p self) {
 	return result;
 }
 
+void CPU_interruptServiceRoutine(CPU_p self) {
+	//1.) Change the state of the running process to interrupted,
+	self->currentProcess->state = blocked;
+	//2.) Save the CPU state to the PCB for that process (PC value)
+	self->currentProcess->addressPC = self->pc;
+	//3.) Upcall to scheduler
+	CPU_scheduler(self, timer);
+	//4.) Put PC value from sysStack into pc
+	self->pc = self->sysStack;
+	//5.) Return
+	return;
+}
+
+void CPU_scheduler(CPU_p self, enum interrupt_type interrupt) {
+	switch(interrupt) {
+	case timer:
+		//1.) Change its state from interrupted to ready
+		self->currentProcess->state = ready;
+		//2.) Put the process back into the ready queue
+		FIFO_enqueue(self->readyQueue, self->currentProcess);
+		//3.) Upcall to dispatcher
+		CPU_dispatcher(self);
+		break;
+	default:
+		printf("Interrupt unspecified.");
+	}
+	//4.) Return - Chance to do more before returning but nothing yet
+	return;
+}
+
+void CPU_dispatcher(CPU_p self) {
+	//1.) Save the state of the current process into its PCB (here we mean the PC value)
+	/*NOT SURE WHY WE NEED TO DO THIS AGAIN?*/
+	//2.) Dequeue the next waiting process (PCB)
+	self->currentProcess = FIFO_dequeue(self->readyQueue);
+	//3.) Change its state to running
+	self->currentProcess->state = running;
+	//4.) Copy its PC value (and SW if you implement it) to the SysStack location to replace the PC of the interrupted process
+	self->sysStack = self->currentProcess->addressPC;
+	//5.) Return
+	return;
+}
+
 int main() {
 	CPU_p testCPU = CPU_constructor();
 	printf(CPU_toString(testCPU));

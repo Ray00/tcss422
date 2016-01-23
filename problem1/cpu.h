@@ -47,7 +47,7 @@ void CPU_interruptServiceRoutine(CPU_p);
 	//4.) Put PC value from sysStack into pc
 	//5.) Return
 
-void CPU_scheduler(CPU_p, interrupt_type);
+void CPU_scheduler(CPU_p, enum interrupt_type);
 	//1.) Put the process back into the ready queue
 	//2.) Change its state from interrupted to ready
 	//3.) Upcall to dispatcher
