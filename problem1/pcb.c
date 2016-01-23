@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "pcb.h"
 
 /*
@@ -97,8 +98,35 @@ int PCB_getPriority(PCB_p p) {
  * params:	PCB_p pointer to the PCB object in the heap.
  */
  char* PCB_toString(PCB_p me) {
+     char state_description[16];
+     //find correct string to print for state enum
+     //new, ready, running, interrupted, waiting, halted, idle
+     switch (me->state) {
+         case 0:
+             strcpy(state_description, "new");
+             break;
+         case 1:
+             strcpy(state_description, "ready");
+             break;
+         case 2:
+             strcpy(state_description, "running");
+             break;
+         case 3:
+             strcpy(state_description, "interrupted");
+             break;
+         case 4:
+             strcpy(state_description, "waiting");
+             break;
+         case 5:
+             strcpy(state_description, "halted");
+             break;
+         default:
+             strcpy(state_description, "idle");
+             break;
+     }
+     
      char * result = (char *) malloc(sizeof(char) * 1000);
-     sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %d, PC: 0x%04X, etc.\n",
-             me->process_num, me->priority, me->state, me->addressPC);
+     sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %s, PC: 0x%04X\n",
+             me->process_num, me->priority, state_description, me->addressPC);
      return result;
  }
