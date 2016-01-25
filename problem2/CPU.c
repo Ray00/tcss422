@@ -7,6 +7,8 @@
 //
 
 #include "CPU.h"
+#include <time.h>
+#include <unistd.h>
 
 CPU_p CPU_constructor(void) {
     srand((unsigned) time(NULL));
@@ -102,6 +104,8 @@ void mainLoop(CPU_p self) {
         // Timer interrupt handler occurs
         self->sysStack = self->pc; // before it occurs
         CPU_ISR(self, timer);
+
+        sleep(1);
     }
 }
 
