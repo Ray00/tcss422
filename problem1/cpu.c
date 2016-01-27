@@ -16,6 +16,7 @@
 
 unsigned int G_NEW_PROC_ID = 0;
 unsigned int G_LOOP_ITER_NUM = 0;
+FILE *fp;
 
 /*
  * Function:  Main
@@ -40,6 +41,9 @@ void createNewProcesses(CPU_p self) {
 }
 
 int main () {
+
+	/*File I/O*/
+	fp = fopen("scheduleTrace.txt", "w+");
 
     /* main's local variables */
     int timerQuantum = 1;
@@ -93,7 +97,7 @@ int main () {
         G_LOOP_ITER_NUM += 1; //increment loopIterationNum
 
         //sleep for timerQuantum amount of time
-        sleep(timerQuantum);
+        //sleep(timerQuantum);
     }
 
 
