@@ -2,7 +2,7 @@
  * cpu.c
  *
  *  Created on: Jan 22, 2016
- *      Author: nabilfadili, raykim
+ *      Author: nabilfadili, raykim, rigratz
  */
 
 #include <stdlib.h>
@@ -10,6 +10,9 @@
 #include <time.h>
 #include <unistd.h>
 #include "cpu.h"
+
+#define MAX_PROC 29
+#define NUM_OF_LOOPS 1000
 
 unsigned int G_NEW_PROC_ID = 0;
 unsigned int G_LOOP_ITER_NUM = 0;
@@ -54,10 +57,10 @@ int main () {
     cpu_p->pc = 0;
 
     /* round robin simulation */
-    while (G_NEW_PROC_ID < 30) {
+    while (G_LOOP_ITER_NUM < NUM_OF_LOOPS) {
 
         //create up to 5 new processes
-        if (processGenerationComplete != 1 && G_NEW_PROC_ID < 30) {
+        if (processGenerationComplete != 1 && G_NEW_PROC_ID < MAX_PROC) {
             createNewProcesses(cpu_p);
         }
 
