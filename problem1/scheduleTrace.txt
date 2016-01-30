@@ -1,0 +1,124 @@
+Process ID: 1 Enqueued
+content: PCB_ID: 1, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 2 Enqueued
+content: PCB_ID: 2, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 3 Enqueued
+content: PCB_ID: 3, Priority: 1, State: ready, PC: 0x0000
+
+Interrupted Process: content: PCB_ID: 1, Priority: 1, State: ready, PC: 0x9888
+Switching to: content: PCB_ID: 2, Priority: 1, State: ready, PC: 0x0000
+
+Last Process: content: PCB_ID: 1, Priority: 1, State: ready, PC: 0x9888
+Current Process: content: PCB_ID: 2, Priority: 1, State: running, PC: 0x0000
+Ready Queue: P3->P1-*
+
+Process ID: 4 Enqueued
+content: PCB_ID: 4, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 5 Enqueued
+content: PCB_ID: 5, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 6 Enqueued
+content: PCB_ID: 6, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 7 Enqueued
+content: PCB_ID: 7, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 8 Enqueued
+content: PCB_ID: 8, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 9 Enqueued
+content: PCB_ID: 9, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 10 Enqueued
+content: PCB_ID: 10, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 11 Enqueued
+content: PCB_ID: 11, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 12 Enqueued
+content: PCB_ID: 12, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 13 Enqueued
+content: PCB_ID: 13, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 14 Enqueued
+content: PCB_ID: 14, Priority: 1, State: ready, PC: 0x0000
+
+Interrupted Process: content: PCB_ID: 4, Priority: 1, State: ready, PC: 0x931B
+Switching to: content: PCB_ID: 5, Priority: 1, State: ready, PC: 0x0000
+
+Last Process: content: PCB_ID: 4, Priority: 1, State: ready, PC: 0x931B
+Current Process: content: PCB_ID: 5, Priority: 1, State: running, PC: 0x0000
+Ready Queue: P6->P2->P7->P8->P9->P3->P1->P10->P11->P12->P13->P14->P4-*
+
+Process ID: 15 Enqueued
+content: PCB_ID: 15, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 16 Enqueued
+content: PCB_ID: 16, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 17 Enqueued
+content: PCB_ID: 17, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 18 Enqueued
+content: PCB_ID: 18, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 19 Enqueued
+content: PCB_ID: 19, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 20 Enqueued
+content: PCB_ID: 20, Priority: 1, State: ready, PC: 0x0000
+
+Interrupted Process: content: PCB_ID: 7, Priority: 1, State: ready, PC: 0x9052
+Switching to: content: PCB_ID: 8, Priority: 1, State: ready, PC: 0x0000
+
+Last Process: content: PCB_ID: 7, Priority: 1, State: ready, PC: 0x9052
+Current Process: content: PCB_ID: 8, Priority: 1, State: running, PC: 0x0000
+Ready Queue: P9->P3->P1->P10->P11->P12->P13->P14->P4->P15->P16->P5->P6->P17->P18->P19->P2->P20->P7-*
+
+Process ID: 21 Enqueued
+content: PCB_ID: 21, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 22 Enqueued
+content: PCB_ID: 22, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 23 Enqueued
+content: PCB_ID: 23, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 24 Enqueued
+content: PCB_ID: 24, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 25 Enqueued
+content: PCB_ID: 25, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 26 Enqueued
+content: PCB_ID: 26, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 27 Enqueued
+content: PCB_ID: 27, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 28 Enqueued
+content: PCB_ID: 28, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 29 Enqueued
+content: PCB_ID: 29, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 30 Enqueued
+content: PCB_ID: 30, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 31 Enqueued
+content: PCB_ID: 31, Priority: 1, State: ready, PC: 0x0000
+
+Process ID: 32 Enqueued
+content: PCB_ID: 32, Priority: 1, State: ready, PC: 0x0000
+
+Interrupted Process: content: PCB_ID: 1, Priority: 1, State: ready, PC: 0x1A895
+Switching to: content: PCB_ID: 10, Priority: 1, State: ready, PC: 0x0000
+
+Last Process: content: PCB_ID: 1, Priority: 1, State: ready, PC: 0x1A895
+Current Process: content: PCB_ID: 10, Priority: 1, State: running, PC: 0x0000
+Ready Queue: P11->P12->P13->P14->P4->P15->P16->P5->P6->P17->P18->P19->P2->P20->P7->P21->P8->P22->P23->P24->P9->P25->P26->P27->P28->P29->P3->P30->P31->P32->P1-*
+

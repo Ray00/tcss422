@@ -12,6 +12,7 @@
 #include "fifoqueue.h"
 
 typedef struct cpu_type {
+    unsigned int timer;
     unsigned int pc;
     unsigned int sysStack;
     PCB_p currentProcess;
@@ -40,7 +41,7 @@ void CPU_terminatedQueue_enqueue(CPU_p, PCB_p);	//TQ_enqueue - queue of terminat
 PCB_p CPU_terminatedQueue_dequeue(CPU_p);		//TQ_dequeue - queue of terminated PCB's
 
 /*Function Prototypes*/
-void CPU_timerInterruptHandler(CPU_p);
+void CPU_timerInterruptHandler(CPU_p, enum interrupt_type);
 //1.) Change the state of the running process to interrupted,
 //2.) Save the CPU state to the PCB for that process (PC value)
 //3.) Upcall to scheduler

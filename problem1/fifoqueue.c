@@ -186,7 +186,9 @@ PCB_p FIFO_dequeue(PCB_QUEUE_STR_p this){
 	return return_pcb_p;
 }
 
-
+unsigned int FIFO_size(PCB_QUEUE_STR_p self) {
+    return self->num_nodes;
+}
 
 /*
  * Function:  FIFO_toString

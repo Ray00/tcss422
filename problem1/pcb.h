@@ -33,6 +33,9 @@ void PCB_setProcessNumber(PCB_p, unsigned int);
 int PCB_getProcessNumber(PCB_p);
 void PCB_setPriority(PCB_p, unsigned int);
 int PCB_getPriority(PCB_p);
+void PCB_setPC(PCB_p, unsigned int);
+int PCB_getPC(PCB_p);
+void PCB_setState(PCB_p, enum state_type);
 char * PCB_toString(PCB_p);
 
 #endif /* PCB_H_ */

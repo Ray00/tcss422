@@ -90,6 +90,32 @@ int PCB_getPriority(PCB_p p) {
 }
 
 /*
+ * Function:  PCB_setPC
+ * --------------------
+ * Sets the passed PCB object's PC address field to the passed addressPC.
+ *
+ *  params: PCB_p pointer to the PCB object in the heap and the designated priority.
+ */
+void PCB_setPC (PCB_p self, unsigned int pc) {
+    self->addressPC = pc;
+}
+
+/*
+ * Function:  PCB_getPC
+ * --------------------
+ * Gets the passed PCB object's PC address.
+ *
+ *  returns: The PCB object's PC address.
+ */
+int PCB_getPC (PCB_p self) {
+    return self->addressPC;
+}
+
+void PCB_setState (PCB_p self, enum state_type s) {
+    self->state = s;
+}
+
+/*
  * Function:  PCB_toString
  * --------------------
  * Prints relevant information about the PCB object to the console for
