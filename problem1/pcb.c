@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "pcb.h"
 
 /*
@@ -23,14 +24,75 @@
  *			 addSp
  *  returns: PCB_p pointer to the PCB object in the heap
  */
-PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp) {
+PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSW, unsigned int addSp) {
     PCB_p result = (PCB_p) malloc(sizeof(PCB));
     if (result != (PCB_p) NULL) {
         result->process_num = pID;
         result->priority = priority;
         result->state = s;
         result->addressPC = addPC;
+        result->addressSW = addSW;
         result->addressSpace = addSp;
+        result->max_pc = MAX_PC;
+        result->terminate = 0;
+        result->term_count = 0;
+
+        //Get the creation time
+        time_t rawtime;
+        struct tm * timeinfo;
+        time ( &rawtime );
+        timeinfo = localtime ( &rawtime );
+
+        result->creation = timeinfo;
+
+        int i = 0;
+        int j = 0;
+        int temp = 0;
+        int check = 0;
+        srand(time(NULL));
+
+        //Create I/O 1 Traps
+        unsigned int traps1[4];
+
+        temp = rand() % MAX_PC;
+        traps1[0] = temp;
+        printf("%d\n", temp);
+        for (i = 1; i < 4; i++) {
+          temp = rand() % MAX_PC;
+          printf("%d\n", temp);
+            check = 0;
+          for (j = 0; j < i; j++) {
+            if (temp == traps1[j]) {
+              check = 1;
+            }
+          }
+          if (check == 0) {
+            traps1[i] = temp;
+          } else {
+            i--;
+          }
+        }
+        result->io_1_traps = traps1;
+
+        //Create I/O 1 Traps
+        unsigned int traps2[4];
+        temp = rand() % MAX_PC;
+        traps2[0] = temp;
+        for (i = 1; i < 4; i++) {
+          temp = rand() % MAX_PC;
+          check = 0;
+          for (j = 0; j < i; j++) {
+            if (temp == traps2[j]) {
+              check = 1;
+            }
+          }
+          if (check == 0) {
+            traps2[i] = temp;
+          } else {
+            i--;
+          }
+        }
+        result->io_2_traps = traps2;
     }
     return result;
 }
@@ -115,6 +177,30 @@ void PCB_setState (PCB_p self, enum state_type s) {
     self->state = s;
 }
 
+void PCB_terminate(PCB_p this) {
+  this->terminate = 1;
+
+  //Set termination time
+  time_t rawtime;
+  struct tm * timeinfo;
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+
+  this->termination = timeinfo;
+
+}
+void PCB_incrementTermCount(PCB_p this) {
+  this->term_count++;
+}
+
+unsigned int * PCB_getIO1Traps(PCB_p this) {
+    return this->io_1_traps;
+}
+
+unsigned int * PCB_getIO2Traps(PCB_p this) {
+    return this->io_2_traps;
+}
+
 /*
  * Function:  PCB_toString
  * --------------------
@@ -150,7 +236,7 @@ void PCB_setState (PCB_p self, enum state_type s) {
              strcpy(state_description, "idle");
              break;
      }
-     
+
      char * result = (char *) malloc(sizeof(char) * 1000);
      sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %s, PC: 0x%04X\n",
              me->process_num, me->priority, state_description, me->addressPC);
