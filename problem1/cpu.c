@@ -5,19 +5,9 @@
  *      Author: nabilfadili, raykim
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <unistd.h>
-#include "cpu.h"
-
-#define MAX_PROC 30
-#define TIME_SLICE 10   // suppose TIME_SLICE is 10 ns
-
 unsigned int G_NEW_PROC_ID = 0;
-unsigned int G_LOOP_ITER_NUM = 0;
-PCB_p IDLE; 
-FILE *fp;
+
+//FILE *fp;
 
 /*
  * Function:  Main
@@ -25,96 +15,133 @@ FILE *fp;
  *
  */
 
-void createNewProcesses(CPU_p self) {
-    int random_num_range_0_to_5 = rand() % 6; //create a random number of new processes, between 0 and 5
-
-    //place random num processes into cpu_p->createdQueue
-    for (int i = 1; i <= random_num_range_0_to_5; i++) {
-
-        G_NEW_PROC_ID += 1;
-
-        //PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp)
-        FIFO_enqueue(self->createdQueue, PCB_constructor(G_NEW_PROC_ID, 1, new, 0, 0));
-    }
-}
-
 void mainLoop(CPU_p self) {
 
 	/*File I/O*/
-	fp = fopen("scheduleTrace.txt", "w+");
-
-    /* set idle */
-    self->currentProcess = IDLE;
-    self->pc = 0;
+//	fp = fopen("scheduleTrace.txt", "w+");
 
     /* round robin simulation */
-    while (G_NEW_PROC_ID < MAX_PROC) {
-        self->timer = 0;
+    while (1) {
 
+        /*****************************************/
+        /********* Create new processes **********/
+        /*****************************************/
         //create up to 5 new processes
-        createNewProcesses(self);
-
-        //add first in line process of self->createdQueue (if exists) to self->readyQueue
-        // FIXME (Kyle) why just add one process?? I move all the process from createdQueue to readyQueue
-        // If there is any question, let me know.
+        if (G_NEW_PROC_ID < 30) {
+            createNewProcesses(self);
+        }
+        
+        //add newly created processes in self->createdQueue to self->readyQueue
         while (FIFO_size(self->createdQueue) != 0) {
             PCB_p temp_pcb_p = FIFO_dequeue(self->createdQueue);
             PCB_setState(temp_pcb_p, ready);
             FIFO_enqueue(self->readyQueue, temp_pcb_p);
 
             printf("Process ID: %u Enqueued\n", temp_pcb_p->process_num); //print message that process has been enqueued
-            fprintf(fp, "Process ID: %u Enqueued\n", temp_pcb_p->process_num); //output to file
+//            fprintf(fp, "Process ID: %u Enqueued\n", temp_pcb_p->process_num); //output to file
 
             puts(PCB_toString(temp_pcb_p)); //print PCB contents
-            fprintf(fp, "%s", PCB_toString(temp_pcb_p)); //output PCB contents
-            fprintf(fp, "\n");
+//            fprintf(fp, "%s", PCB_toString(temp_pcb_p)); //output PCB contents
+//            fprintf(fp, "\n");
         }
         
-        //      2. dequeue the first pcb in the ready queue.
-        if (self->currentProcess == IDLE && FIFO_size(self->readyQueue) > 0) {
+        //if current process is IDLE and processes available in readyQueue, load first process in readyQueue into CPU
+        if (self->currentProcess == NULL && FIFO_size(self->readyQueue) > 0) {
             self->currentProcess = FIFO_dequeue(self->readyQueue);
             PCB_setState(self->currentProcess, running);
-        }
-
-        //increment the PC value by a random number between 3,000 and 4,000
-        if (self->pc < 3000) {
-            self->pc = rand() / (RAND_MAX / 1000) + 2000;
-        }
-        while (self->timer < TIME_SLICE) {
-            self->timer++;
-            self->pc += (rand() / (RAND_MAX / 1000)) + 3000;
-            // if the process need io request, it up-calls here.
         }
 
         //pseudo-push PC to the system stack (interrupt does this in reality)
         CPU_SysStack_push(self, self->pc);
 
         /*****************************************/
-        /********** Kernel Mode Starts ***********/
+        /* Simulated Fetch, Decode, Execute Cycle /
         /*****************************************/
 
-        //call timer interrupt handler
-        CPU_timerInterruptHandler(self, timer);
-
+        //check if current PC matches with any IO calls in the 2 IO traps arrays
+        unsigned int call_device_num = PCB_currPCHasIOCall(self->currentProcess, self->pc);
+        
+        //FUTURE TODO add Fetch Decode Execute instructions
+        
+        
         /*****************************************/
-        /*********** Kernel Mode Ends ************/
+        /********* Check Timer Interrupt *********/
+        /*****************************************/
+        
+        //TODO check if timer interrupt has occured in if statement
+        
+        DISCONT_STR_PTR timerInterruptHandler = (DISCONT_STR_PTR) malloc(sizeof(DISCONT_STR));
+        timerInterruptHandler = DISCONT_constructor(0, timer, TIMER_scheduler);
+        DISCONT_ISR(timerInterruptHandler, self); //call interrupt service routine
+
+        
+        /*****************************************/
+        /**** Check I/O Completion Interrupts ****/
         /*****************************************/
 
-        G_LOOP_ITER_NUM += 1; //increment loopIterationNum
+        //TODO check if IO completion interrupt has cocured in if statement
+        
+        DISCONT_STR_PTR IOCompletionInterruptHandler = (DISCONT_STR_PTR) malloc(sizeof(DISCONT_STR));
+        IOCompletionInterruptHandler = DISCONT_constructor(1, io, IO_x_handler);
+        DISCONT_ISR(IOCompletionInterruptHandler, self); //call interrupt service routine
+        
+        /*****************************************/
+        /******* Call trap service handler *******/
+        /*****************************************/
+        if (call_device_num != 0) {
+            DISCONT_TSR(call_device_num);
+        }
+        
+        /*****************************************/
+        /* PC increment & process termination check /
+        /*****************************************/
+        
+        self->pc += 1; //increment cpu pc
+        
+        //see if pc has incremented over MAX_PC
+        if (self->pc > self->currentProcess->max_pc) {
+            self->pc = 0;
+            PCB_incrementTermCount(self->currentProcess);
+        }
+        
+        //if process has run full course, move to termination stack
+        if (PCB_checkTerminate(self->currentProcess)) {
+            PCB_terminate(self->currentProcess);
+            //move process to termination queue
+            self->currentProcess->addressPC = self->pc;
+            priority_enqueue(self->terminatedQueue, self->currentProcess);
+            //bring in new process from readyqueue
+            self->currentProcess = priority_dequeue(self->readyQueue);
+            if (self->currentProcess == NULL)
+                exit();
+            self->pc = self->currentProcess->addressPC;
+        }
 
-        //sleep for timerQuantum amount of time
-        //sleep(timerQuantum);
     }
 }
 
 
+void createNewProcesses(CPU_p self) {
+    int random_num_range_0_to_5 = rand() % 6; //create a random number of new processes, between 0 and 5
+    
+    //place random num processes into cpu_p->createdQueue
+    for (int i = 1; i <= random_num_range_0_to_5; i++) {
+        
+        G_NEW_PROC_ID += 1;
+        
+        //PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp)
+        FIFO_enqueue(self->createdQueue, PCB_constructor(G_NEW_PROC_ID, 1, new, 0, 0));
+    }
+}
+
 CPU_p CPU_constructor(void) {
     srand((unsigned) time(NULL));
     CPU_p newCPU = (CPU_p) malloc(sizeof(CPU));
-    IDLE = PCB_constructor(G_NEW_PROC_ID, 999, idle, 0, 0);
+    //IDLE = PCB_constructor(G_NEW_PROC_ID, 999, idle, 0, 0);
     newCPU->timer = 0;
     newCPU->pc = 0;
-    newCPU->sysStack = 0;
+    newCPU->sysStack = (unsigned int *) malloc(sizeof(unsigned int) * STACK_SIZE);
+    newCPU->sysStackPointer = newCPU->sysStack;
     newCPU->currentProcess = NULL;
     /* queue instantiation */
     newCPU->readyQueue = FIFO_constructor();
@@ -141,11 +168,13 @@ unsigned int CPU_getPC(CPU_p self) {
 }
 
 void CPU_SysStack_push(CPU_p self, unsigned int pc) {
-    self->sysStack = pc;
+    *(self->sysStackPointer) = pc;
+    (self->sysStackPointer)++;
 }
 
 unsigned int CPU_SysStack_pop(CPU_p self) {
-    return self->sysStack;
+    (self->sysStackPointer)--;
+    return *(self->sysStackPointer);
 }
 
 void CPU_setCurrentProcess(CPU_p self, PCB_p pcb) {
@@ -187,43 +216,40 @@ char* CPU_toString(CPU_p self) {
     return result;
 }
 
-void CPU_timerInterruptHandler(CPU_p self, enum interrupt_type itype) {
-    //1.) Change the state of the running process to interrupted,
-    PCB_setState(self->currentProcess, interrupted); 
-    //2.) Save the CPU state to the PCB for that process (PC value)
-    PCB_setPC(self->currentProcess, self->pc);
-    //3.) Upcall to scheduler
-    CPU_scheduler(self, itype);
-    //4.) Put PC value from sysStack into pc
-    self->pc = CPU_SysStack_pop(self); /********* IRET *********/
+//void CPU_timerInterruptHandler(CPU_p self, enum interrupt_type itype) {
+//    //1.) Change the state of the running process to interrupted,
+//    PCB_setState(self->currentProcess, interrupted); 
+//    //2.) Save the CPU state to the PCB for that process (PC value)
+//    PCB_setPC(self->currentProcess, self->pc);
+//    //3.) Upcall to scheduler
+//    CPU_scheduler(self, itype);
+//    //4.) Put PC value from sysStack into pc
+//    self->pc = CPU_SysStack_pop(self); /********* IRET *********/
+//
+//    //5.) Return
+//    return;
+//}
 
-    //5.) Return
-    return;
-}
+/******* the code below should be moved to timer class *******/
+void CPU_scheduler(CPU_p self) {
 
-void CPU_scheduler(CPU_p self, enum interrupt_type interrupt) {
-    switch(interrupt) {
-        case timer:
-            //1.) Change its state from interrupted to ready
-            self->currentProcess->state = ready;
-            //2.) Put the process back into the ready queue (if not idle process)
-            if (self->currentProcess->state != idle) {
-                FIFO_enqueue(self->readyQueue, self->currentProcess);
-            }
-
-            //3.) Upcall to dispatcher
-            CPU_dispatcher(self);
-            //4.) Additional house keeping
-            //future TODO
-            break;
-        case io: break; /// not for this homework.
-        default:
-            printf("Interrupt type unspecified.");
+    //1.) Change its state from interrupted to ready
+    self->currentProcess->state = ready;
+    //2.) Put the process back into the ready queue (if not idle process)
+    if (self->currentProcess != NULL) {
+        FIFO_enqueue(self->readyQueue, self->currentProcess);
     }
+
+    //3.) Upcall to dispatcher
+    CPU_dispatcher(self);
+    //4.) Additional house keeping
+    //future TODO
+
     //4.) Return - Chance to do more before returning but nothing yet
     return;
 }
 
+/******* the code below should be moved to timer class *******/
 void CPU_dispatcher(CPU_p self) {
     PCB_p next_process_p = FIFO_dequeue(self->readyQueue);
     PCB_p last_process_p = self->currentProcess;
@@ -263,7 +289,8 @@ void CPU_dispatcher(CPU_p self) {
 }
 
 int main() {
-   CPU_p cpu = CPU_constructor();
+    CPU_p cpu = CPU_constructor();
+    
 //    printf(CPU_toString(cpu));
 
 //    unsigned int testPC = 3000;

@@ -3,18 +3,27 @@
  *
  *  Created on: Jan 22, 2016
  *      Author: nabilfadili
+ *      Edited by: ray
  */
 
 #ifndef CPU_H_
 #define CPU_H_
 
+#include <stdlib.h>
+#include <stdio.h>
+#include "cpu.h"
 #include "pcb.h"
 #include "fifoqueue.h"
+#include "discontinuities.h"
+
+#define MAX_PROC 30
+#define TIME_SLICE 10   // suppose TIME_SLICE is 10 ns
+#define STACK_SIZE 500
 
 typedef struct cpu_type {
-    unsigned int timer;
     unsigned int pc;
-    unsigned int sysStack;
+    unsigned int * sysStack;
+    unsigned int * sysStackPointer;
     PCB_p currentProcess;
     PCB_QUEUE_STR_p readyQueue;					//fifoqueue
     PCB_QUEUE_STR_p createdQueue;				//fifoqueue
@@ -22,9 +31,18 @@ typedef struct cpu_type {
 } CPU;
 typedef CPU *CPU_p;
 
+/*** global extern variables ***/
+extern int GLOBAL_TIMER_INTERRUPT;
+extern int GLOBAL_IO_COMPLETION_INTERRUPT;
+
+/*** function pointer signature used for all handler functions ***/
+typedef void (*handler_fp)(PCB_P);
+
 enum interrupt_type {timer, io};
 
-/*Construction Prototypes*/
+
+/*** Construction Prototypes ****/
+void createNewProcesses(CPU_p)
 CPU_p CPU_constructor(void);					//Instantiates CPU struct, including all the queues
 void CPU_destructor(CPU_p);						//Free's all memory related to the passed CPU object
 void CPU_setPC(CPU_p, unsigned int);			//pc setter
