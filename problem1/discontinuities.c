@@ -73,17 +73,19 @@ void DISCONT_ISR (DISCONT_STR_PTR self, CPU_p cpu_p) {
  * Trap service routine
  * Calls the appropriate trap service handler
  *
- * params:  DISCONT_STR_PTR self
+ * params:  CPU_p           cpu
  *          unsigned int    device number
  * return: none
  */
 void DISCONT_TSR (CPU_p cpu_p, unsigned int call_device_num) {
-    //Put PC value into sysStack
-    CPU_SysStack_push(cpu_p, cpu_p->pc);
+
+    //put current process' status into "blocked"
+    cpu_p->currentProcess->state = blocked;
     
     switch (call_device_num) {
         case 1:
             //TODO call trap service handler code here
+            //trap handler moves current process into queue for device
             break;
         case 2:
             //TODO call trap service handler code here
@@ -94,8 +96,6 @@ void DISCONT_TSR (CPU_p cpu_p, unsigned int call_device_num) {
             break;
     }
     
-    //Put PC value from sysStack into pc
-    cpu_p->pc = CPU_SysStack_pop(cpu_p); /********* IRET *********/
     
     return;
 }

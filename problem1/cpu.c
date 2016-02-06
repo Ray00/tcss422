@@ -89,7 +89,7 @@ void mainLoop(CPU_p self) {
         /******* Call trap service handler *******/
         /*****************************************/
         if (call_device_num != 0) {
-            DISCONT_TSR(call_device_num);
+            DISCONT_TSR(self, call_device_num);
         }
         
         /*****************************************/
