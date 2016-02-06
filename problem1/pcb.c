@@ -5,11 +5,7 @@
  *      Author: Kyle Doan, nabilfadili
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "pcb.h"
+
 
 /*
  * Function:  PCB_constructor
@@ -184,18 +180,45 @@ void PCB_setState (PCB_p self, enum state_type s) {
     self->state = s;
 }
 
-void PCB_terminate(PCB_p this) {
-  this->terminate = 1;
 
-  //Set termination time
-  time_t rawtime;
-  struct tm * timeinfo;
-  time ( &rawtime );
-  timeinfo = localtime ( &rawtime );
-
-  this->termination = timeinfo;
-
+/*
+ * Function:  PCB_checkTerminate
+ * --------------------
+ * Checks if term count equals terminate field
+ * If it does, process terminates
+ * if terminate == 0, the process runs infinitely
+ *
+ * Created by Ray
+ *
+ * params:	PCB_p           this
+ * return:  0               if process is infinite or should not termiante
+ *          1               if process has terminated and needs to be removed
+ */
+unsigned int PCB_checkTerminate(PCB_p this) {
+    if (this->term_count == 0) {
+        return 0;
+    } else if (this->terminate == this->term_count) {
+        return 1
+    }
+    
+    return 0;
 }
+
+
+void PCB_terminate(PCB_p this) {
+    this->terminate = 1;
+
+    //Set termination time
+    time_t rawtime;
+    struct tm * timeinfo;
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+
+    this->termination = timeinfo;
+    this->state = terminated;
+}
+
+
 void PCB_incrementTermCount(PCB_p this) {
   this->term_count++;
 }

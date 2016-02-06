@@ -10,9 +10,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include "pcb.h"
 
 //#define NUMREGS 16
-#define MAX_PC 2500
+#define MAX_PC 2345
 #define MAX_CALLS_FOR_IO 4
 
 enum state_type {new, ready, running, interrupted, waiting, halted, idle};
