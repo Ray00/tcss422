@@ -73,7 +73,7 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
             i--;
           }
         }
-        result->io_1_calls_arr = traps1;
+        result->io_1_traps = traps1;
 
 
         //Create I/O 1 Traps
@@ -96,7 +96,7 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
             i--;
           }
         }
-        result->io_2_calls_arr = traps2;
+        result->io_2_traps = traps2;
     }
     return result;
 }
@@ -219,10 +219,10 @@ void PCB_incrementTermCount(PCB_p this) {
  */
 unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
     //check if PC matches either values pointed to by device array pointers
-    if (pc == *(this->io_1_array_ptr) && (this->io_1_array_ptr < this->io_1_calls_arr + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_1_calls_arr
+    if (pc == *(this->io_1_array_ptr) && (this->io_1_array_ptr < this->io_1_traps + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_1_traps
         (this->io_1_array_ptr)++; //increment pointer to next value
         return 1;
-    } else if (pc == *(this->io_2_array_ptr) && (this->io_2_array_ptr < this->io_2_calls_arr + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_2_calls_arr
+    } else if (pc == *(this->io_2_array_ptr) && (this->io_2_array_ptr < this->io_2_traps + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_2_traps
         (this->io_2_array_ptr)++; //increment pointer to next value
         return 2;
     }

@@ -30,8 +30,8 @@ typedef struct pcb_type {
 		unsigned int term_count;
     unsigned int * io_1_array_ptr;
     unsigned int * io_2_array_ptr;
-		unsigned int * io_1_calls_arr;
-		unsigned int * io_2_calls_arr;
+		unsigned int * io_1_traps;
+		unsigned int * io_2_traps;
 //    int reg_file[NUMREGS];      /* contents of GPRs */
     unsigned int addressSpace;  /* where in memory */
 } PCB;
