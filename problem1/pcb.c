@@ -52,8 +52,9 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
         srand(time(NULL));
 
         //Create I/O 1 Traps
-        unsigned int traps1[4];
-
+        unsigned int * traps1 = (unsigned int *) malloc(sizeof(unsigned int) * MAX_CALLS_FOR_IO);
+        result->io_1_array_ptr = traps1;
+        
         temp = rand() % MAX_PC;
         traps1[0] = temp;
         printf("%d\n", temp);
@@ -72,10 +73,13 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
             i--;
           }
         }
-        result->io_1_traps = traps1;
+        result->io_1_calls_arr = traps1;
+
 
         //Create I/O 1 Traps
-        unsigned int traps2[4];
+        unsigned int * traps2 = (unsigned int *) malloc(sizeof(unsigned int) * MAX_CALLS_FOR_IO);
+        result->io_2_array_ptr = traps2;
+        
         temp = rand() % MAX_PC;
         traps2[0] = temp;
         for (i = 1; i < 4; i++) {
@@ -92,10 +96,13 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
             i--;
           }
         }
-        result->io_2_traps = traps2;
+        result->io_2_calls_arr = traps2;
     }
     return result;
 }
+
+
+
 
 PCB_p PCB_constructorWithEmpty() {
 	PCB_p result = (PCB_p) malloc(sizeof(PCB));
@@ -193,13 +200,36 @@ void PCB_incrementTermCount(PCB_p this) {
   this->term_count++;
 }
 
-unsigned int * PCB_getIO1Traps(PCB_p this) {
-    return this->io_1_traps;
+
+
+
+/*
+ * Function:  PCB_currPCHasIOCall
+ * --------------------
+ * Looks through IO device array of PCs to see if any device makes an IO request for current PC
+ * Note: no two devices should make device calls during the same PC instruction
+ *
+ * Created by Ray
+ *
+ * params:	PCB_p           this
+ *          unsigned int    current PC
+ * return:  0               for no IO call
+ *          1               if PC instruction makes call for device 1
+ *          2               if PC instruction makes call for device 2
+ */
+unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
+    //check if PC matches either values pointed to by device array pointers
+    if (pc == *(this->io_1_array_ptr) && (this->io_1_array_ptr < this->io_1_calls_arr + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_1_calls_arr
+        (this->io_1_array_ptr)++; //increment pointer to next value
+        return 1;
+    } else if (pc == *(this->io_2_array_ptr) && (this->io_2_array_ptr < this->io_2_calls_arr + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_2_calls_arr
+        (this->io_2_array_ptr)++; //increment pointer to next value
+        return 2;
+    }
+    
+    return 0;
 }
 
-unsigned int * PCB_getIO2Traps(PCB_p this) {
-    return this->io_2_traps;
-}
 
 /*
  * Function:  PCB_toString

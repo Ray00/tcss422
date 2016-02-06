@@ -13,6 +13,7 @@
 
 //#define NUMREGS 16
 #define MAX_PC 2500
+#define MAX_CALLS_FOR_IO 4
 
 enum state_type {new, ready, running, interrupted, waiting, halted, idle};
 
@@ -27,8 +28,10 @@ typedef struct pcb_type {
 		struct tm * termination;
 		unsigned int terminate;
 		unsigned int term_count;
-		unsigned int * io_1_traps;
-		unsigned int * io_2_traps;
+    unsigned int * io_1_array_ptr;
+    unsigned int * io_2_array_ptr;
+		unsigned int * io_1_calls_arr;
+		unsigned int * io_2_calls_arr;
 //    int reg_file[NUMREGS];      /* contents of GPRs */
     unsigned int addressSpace;  /* where in memory */
 } PCB;
@@ -47,8 +50,7 @@ int PCB_getPC(PCB_p);
 void PCB_setState(PCB_p, enum state_type);
 void PCB_terminate(PCB_p);
 void PCB_incrementTermCount(PCB_p);
-unsigned int * PCB_getIO1Traps(PCB_p);
-unsigned int * PCB_getIO2Traps(PCB_p);
+unsigned int PCB_currPCHasIOCall(unsigned int, PCB_p);
 char * PCB_toString(PCB_p);
 
 #endif /* PCB_H_ */
