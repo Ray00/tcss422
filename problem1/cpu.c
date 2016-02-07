@@ -265,7 +265,8 @@ void CPU_dispatcher(CPU_p self) {
         fprintf(fp, "Interrupted Process: %s", PCB_toString(last_process_p)); //output contents of running process
         fprintf(fp, "Switching to: %s\n", PCB_toString(next_process_p)); //output contents of ready queue head
     }
-
+    //Put PC value from sysStack into last running process that has been placed into the readyqueue in the scheduler function
+    PCB_setPC(cpu_p->currentProcess, CPU_SysStack_pop(cpu_p));
     //2.) Dequeue the next waiting process (PCB)
     self->currentProcess = next_process_p;
     //3.) Change its state to running

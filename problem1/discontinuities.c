@@ -39,30 +39,33 @@ DISCONT_STR_PTR DISCONT_constructor (unsigned int vector, enum interrupt_type in
  * return: none
  */
 void DISCONT_ISR (DISCONT_STR_PTR self, CPU_p cpu_p) {
-    //1.) Change the state of the running process to interrupted,
+    
+    //Put PC value into sysStack
+    CPU_SysStack_push(cpu_p, cpu_p->pc);
+    
+    //Change the state of the running process to interrupted,
     PCB_setState(cpu_p->currentProcess, interrupted);
+    
     
     //determine if interrupt is caused by IO completion or timer
     switch (self->interrupt) {
         case timer: //FIXME does it make sense to have timer interrupt running while running IO completion handler???
-            //Save the CPU state to the PCB for that process (PC value)
-            PCB_setPC(cpu_p->currentProcess, cpu_p->pc);
+
             //Upcall to specific interrupt handler
             self->handler_func(cpu_p);
             break;
         case io:
-            //Put PC value into sysStack
-            CPU_SysStack_push(cpu_p, cpu_p->pc);
             //Upcall to specific interrupt handler
             self->handler_func(cpu_p);
-            //Put PC value from sysStack into pc
-            cpu_p->pc = CPU_SysStack_pop(cpu_p); /********* IRET *********/
             break;
         default:
             puts("Non supported interrupt type.");
             exit();
             break;
     }
+    
+    //Put PC value from sysStack into pc
+    cpu_p->pc = CPU_SysStack_pop(cpu_p); /********* IRET *********/
     
     return;
 }
@@ -79,8 +82,11 @@ void DISCONT_ISR (DISCONT_STR_PTR self, CPU_p cpu_p) {
  */
 void DISCONT_TSR (CPU_p cpu_p, unsigned int call_device_num) {
 
+    //Put PC value into sysStack
+    CPU_SysStack_push(cpu_p, cpu_p->pc);
+    
     //put current process' status into "blocked"
-    cpu_p->currentProcess->state = blocked;
+    cpu_p->currentProcess->state = blocked; //this should be done in handler
     
     switch (call_device_num) {
         case 1:
@@ -95,7 +101,9 @@ void DISCONT_TSR (CPU_p cpu_p, unsigned int call_device_num) {
             exit();
             break;
     }
-    
+
+    //Put PC value from sysStack into pc
+    cpu_p->pc = CPU_SysStack_pop(cpu_p); /********* IRET *********/
     
     return;
 }
