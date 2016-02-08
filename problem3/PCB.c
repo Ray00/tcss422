@@ -5,8 +5,6 @@
  *      Author: Kyle Doan, nabilfadili
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "pcb.h"
 
 /*
@@ -22,14 +20,43 @@
  *			 addSp
  *  returns: PCB_p pointer to the PCB object in the heap
  */
-PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp) {
+PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSW, unsigned int addSp) {
     PCB_p result = (PCB_p) malloc(sizeof(PCB));
     if (result != (PCB_p) NULL) {
+        srand((unsigned) time(NULL));
+        time_t rawtime;
+        time (&rawtime);
+
         result->process_num = pID;
         result->priority = priority;
         result->state = s;
         result->addressPC = addPC;
+        result->addressSW = addSW;
         result->addressSpace = addSp;
+        result->max_pc = MAX_PC;
+        result->creation = localtime(&rawtime);
+        result->termination = NULL;
+        result->terminate = rand() / (RAND_MAX / 15) + 1;  // FIXME
+        result->term_count = 0;
+        result->io1_trap[0] = rand() / (RAND_MAX / 300);
+        result->io2_trap[0] = rand() / (RAND_MAX / 300);
+        unsigned int temp, i = 1;
+        // FIXME it is possible that it will occur infinity loop.
+        while (i < 4) {
+            temp = rand() / (RAND_MAX / 2345);
+            if (temp > io1_trap[i - 1]) {
+                io1_trap[i] = temp;
+                i++;
+            }
+        }
+        i = 1;
+        while (i < 4) {
+            temp = rand() / (RAND_MAX / 2345);
+            if (temp > io2_trap[i - 1]) {
+                io2_trap[i] = temp;
+                i++;
+            }
+        }
     }
     return result;
 }
@@ -62,7 +89,7 @@ void PCB_setProcessNumber(PCB_p p, unsigned int process_num) {
 	p->process_num = process_num;
 }
 
-int PCB_getProcessNumber(PCB_p p) {
+unsigned int PCB_getProcessNumber(PCB_p p) {
 	return p->process_num;
 }
 
@@ -84,7 +111,7 @@ void PCB_setPriority(PCB_p p, unsigned int priority) {
  *
  *  returns: The PCB object's priority.
  */
-int PCB_getPriority(PCB_p p) {
+unsigned int PCB_getPriority(PCB_p p) {
 	return p->priority;
 }
 
@@ -106,12 +133,50 @@ void PCB_setPC (PCB_p self, unsigned int pc) {
  *
  *  returns: The PCB object's PC address.
  */
-int PCB_getPC (PCB_p self) {
+unsigned int PCB_getPC (PCB_p self) {
     return self->addressPC;
+}
+
+void PCB_setSW (PCB_p me, unsigned int sw) {
+    me->addressSW = sw;
+}
+
+unsigned int PCB_getSW (PCB_p me) {
+    return me->addressSW;
 }
 
 void PCB_setState (PCB_p self, enum state_type s) {
     self->state = s;
+}
+
+void PCB_incrementTermCount(PCB_p me) {
+    me->term_count++;
+}
+
+/*
+ * Function:  PCB_checkTerminate
+ * --------------------
+ * Checks if term count equals terminate field
+ * If it does, process terminates
+ * if terminate == 0, the process runs infinitely
+ *
+ * Created by Ray
+ *
+ * params:	PCB_p           this
+ * return:  0               if process is infinite or should not termiante
+ *          1               if process has terminated and needs to be removed
+ */
+unsigned int PCB_checkTerminate(PCB_p this) {
+    return (this->terminate == this->term_count) ? 1 : 0;
+}
+
+void PCB_terminate(PCB_p this) {
+    //Set termination time
+    time_t rawtime;
+    time (&rawtime);
+
+    this->termination = localtime (&rawtime);
+    this->state = terminated;
 }
 
 char* getStateString(enum state_type state) {

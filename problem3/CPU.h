@@ -10,22 +10,24 @@
 #define CPU_h
 
 #include "fifoqueue.h"
+#include "timer.h"
+#include "stack.h"
+#include "IO.h"
 #include <stdio.h>
-#include <time.h>
 
 #define TIME_SLICE 10
 
 typedef struct cpu_struct {
     unsigned int timer;
     unsigned int pc;
-    unsigned int sysStack;
-    PCB_p cur;
+    Stack_p sysStack;
+    PCB_p current;
     PCB_QUEUE_STR_p readyQueue;
     PCB_QUEUE_STR_p createdQueue;
     PCB_QUEUE_STR_p terminateQueue;
 } *CPU_p;
 
-enum interrupt_type {timer, io};
+enum interrupt_type {timer, io1, io2};
 
 CPU_p CPU_constructor(void);
 void CPU_destructor(CPU_p);
