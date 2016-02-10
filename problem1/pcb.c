@@ -50,13 +50,13 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
         //Create I/O 1 Traps
         unsigned int * traps1 = (unsigned int *) malloc(sizeof(unsigned int) * MAX_CALLS_FOR_IO);
         result->io_1_array_ptr = traps1;
-        
+
         temp = rand() % MAX_PC;
         traps1[0] = temp;
-        printf("%d\n", temp);
+        //printf("%d\n", temp);
         for (i = 1; i < 4; i++) {
           temp = rand() % MAX_PC;
-          printf("%d\n", temp);
+          //printf("%d\n", temp);
             check = 0;
           for (j = 0; j < i; j++) {
             if (temp == traps1[j]) {
@@ -69,13 +69,27 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
             i--;
           }
         }
+        //Sort Traps1
+        i = 0;
+        j = 0;
+        temp = 0;
+        for (i = 0; i < 4; i++) {
+          for (j = i + 1; j < 4; j++) {
+            if (traps1[i] > traps1[j]) {
+                  temp =  traps1[i];
+                  traps1[i] = traps1[j];
+                  traps1[j] = temp;
+            }
+          }
+        }
+
         result->io_1_traps = traps1;
 
 
-        //Create I/O 1 Traps
+        //Create I/O 2 Traps
         unsigned int * traps2 = (unsigned int *) malloc(sizeof(unsigned int) * MAX_CALLS_FOR_IO);
         result->io_2_array_ptr = traps2;
-        
+
         temp = rand() % MAX_PC;
         traps2[0] = temp;
         for (i = 1; i < 4; i++) {
@@ -90,6 +104,19 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
             traps2[i] = temp;
           } else {
             i--;
+          }
+        }
+        //Sort Traps2
+        i = 0;
+        j = 0;
+        temp = 0;
+        for (i = 0; i < 4; i++) {
+          for (j = i + 1; j < 4; j++) {
+            if (traps2[i] > traps2[j]) {
+                  temp =  traps2[i];
+                  traps2[i] = traps2[j];
+                  traps2[j] = temp;
+            }
           }
         }
         result->io_2_traps = traps2;
@@ -200,7 +227,7 @@ unsigned int PCB_checkTerminate(PCB_p this) {
     } else if (this->terminate == this->term_count) {
         return 1
     }
-    
+
     return 0;
 }
 
@@ -249,7 +276,7 @@ unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
         (this->io_2_array_ptr)++; //increment pointer to next value
         return 2;
     }
-    
+
     return 0;
 }
 
