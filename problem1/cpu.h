@@ -11,7 +11,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "cpu.h"
 #include "pcb.h"
 #include "fifoqueue.h"
 #include "discontinuities.h"

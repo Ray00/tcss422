@@ -15,6 +15,8 @@
 #include "pcb.h"
 #include "cpu.h"
 
+enum interrupt_type {timer, io_completion, io_handler};
+
 typedef struct discontinuities_str {
     unsigned int vector; //aka trap service routine number
     enum interrupt_type interrupt;
@@ -30,7 +32,7 @@ typedef void (*handler_fp)(CPU_P);
 DISCONT_STR_PTR DISCONT_constructor (unsigned int, enum interrupt_type, handler_fp);
 
 void DISCONT_ISR (DISCONT_STR_PTR, CPU_P);
-void DISCONT_TSR (CPU_p, unsigned int);
+void DISCONT_TSR (DISCONT_STR_PTR, CPU_P);
 
 void DISCONT_destructor (DISCONT_STR_PTR);
 

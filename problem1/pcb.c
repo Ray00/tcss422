@@ -5,7 +5,7 @@
  *      Author: Kyle Doan, nabilfadili
  */
 
-
+#include "pcb.h"
 
 /*
  * Function:  PCB_constructor
@@ -22,6 +22,9 @@
  */
 PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSW, unsigned int addSp) {
     PCB_p result = (PCB_p) malloc(sizeof(PCB));
+    
+    srand(time(NULL));
+    
     if (result != (PCB_p) NULL) {
         result->process_num = pID;
         result->priority = priority;
@@ -30,7 +33,7 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
         result->addressSW = addSW;
         result->addressSpace = addSp;
         result->max_pc = MAX_PC;
-        result->terminate = 0;
+        result->terminate = rand() % 10; //generate random terminate number
         result->term_count = 0;
 
         //Get the creation time
@@ -41,92 +44,73 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
 
         result->creation = timeinfo;
 
-        int i = 0;
-        int j = 0;
-        int temp = 0;
-        int check = 0;
-        srand(time(NULL));
-
-        //Create I/O 1 Traps
-        unsigned int * traps1 = (unsigned int *) malloc(sizeof(unsigned int) * MAX_CALLS_FOR_IO);
-        result->io_1_array_ptr = traps1;
-
-        temp = rand() % MAX_PC;
-        traps1[0] = temp;
-        //printf("%d\n", temp);
-        for (i = 1; i < 4; i++) {
-          temp = rand() % MAX_PC;
-          //printf("%d\n", temp);
-            check = 0;
-          for (j = 0; j < i; j++) {
-            if (temp == traps1[j]) {
-              check = 1;
-            }
-          }
-          if (check == 0) {
-            traps1[i] = temp;
-          } else {
-            i--;
-          }
-        }
-        //Sort Traps1
-        i = 0;
-        j = 0;
-        temp = 0;
-        for (i = 0; i < 4; i++) {
-          for (j = i + 1; j < 4; j++) {
-            if (traps1[i] > traps1[j]) {
-                  temp =  traps1[i];
-                  traps1[i] = traps1[j];
-                  traps1[j] = temp;
-            }
-          }
-        }
-
-        result->io_1_traps = traps1;
+        //create I/O trap call arrays
+        PCB_create_IO_call_array(result->io_1_traps, result->io_1_array_ptr);
+        PCB_create_IO_call_array(result->io_2_traps, result->io_2_array_ptr);
 
 
-        //Create I/O 2 Traps
-        unsigned int * traps2 = (unsigned int *) malloc(sizeof(unsigned int) * MAX_CALLS_FOR_IO);
-        result->io_2_array_ptr = traps2;
-
-        temp = rand() % MAX_PC;
-        traps2[0] = temp;
-        for (i = 1; i < 4; i++) {
-          temp = rand() % MAX_PC;
-          check = 0;
-          for (j = 0; j < i; j++) {
-            if (temp == traps2[j]) {
-              check = 1;
-            }
-          }
-          if (check == 0) {
-            traps2[i] = temp;
-          } else {
-            i--;
-          }
-        }
-        //Sort Traps2
-        i = 0;
-        j = 0;
-        temp = 0;
-        for (i = 0; i < 4; i++) {
-          for (j = i + 1; j < 4; j++) {
-            if (traps2[i] > traps2[j]) {
-                  temp =  traps2[i];
-                  traps2[i] = traps2[j];
-                  traps2[j] = temp;
-            }
-          }
-        }
-        result->io_2_traps = traps2;
-    }
     return result;
 }
 
 
+/* Function: PCB_create_IO_call_array
+ * ------------------------
+ * creates an array of instructions (randomly) at which I/O device traps are called
+ *
+ * params:  unsigned int * trap_call_array pointer to trap call array
+ *          unsigned int * trap call_array_ptr current pointer for trap call array
+ * return: none
+ */
+void PCB_create_trap_call_array (unsigned int * trap_call_array, unsigned int * trap_call_array_ptr) {
+    
+    int i = 0;
+    int j = 0;
+    int temp = 0;
+    int check = 0;
+    
+    trap_call_array = (unsigned int *) malloc(sizeof(unsigned int) * MAX_CALLS_FOR_IO);
+    trap_call_array_ptr = trap_call_array;
+    
+    temp = rand() % MAX_PC;
+    trap_call_array[0] = temp;
+    //printf("%d\n", temp);
+    for (i = 1; i < 4; i++) {
+        temp = rand() % MAX_PC;
+        //printf("%d\n", temp);
+        check = 0;
+        for (j = 0; j < i; j++) {
+            if (temp == traps1[j]) {
+                check = 1;
+            }
+        }
+        if (check == 0) {
+            trap_call_array[i] = temp;
+        } else {
+            i--;
+        }
+    }
+    
+    
+    //Sort Traps calls
+    i = 0;
+    j = 0;
+    temp = 0;
+    for (i = 0; i < 4; i++) {
+        for (j = i + 1; j < 4; j++) {
+            if (traps1[i] > traps1[j]) {
+                temp =  traps1[i];
+                trap_call_array[i] = trap_call_array[j];
+                trap_call_array[j] = temp;
+            }
+        }
+    }
+    
+    
+}
 
-
+    
+    
+    
 PCB_p PCB_constructorWithEmpty() {
 	PCB_p result = (PCB_p) malloc(sizeof(PCB));
 	result->priority = -1;
@@ -141,6 +125,8 @@ PCB_p PCB_constructorWithEmpty() {
  *  params: PCB_p pointer to the PCB object in the heap
  */
 void PCB_destructor(PCB_p p) {
+    free(p->io_1_traps);
+    free(p->io_2_traps);
 	free(p);
 }
 
@@ -268,7 +254,7 @@ void PCB_incrementTermCount(PCB_p this) {
  *          2               if PC instruction makes call for device 2
  */
 unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
-    //check if PC matches either values pointed to by device array pointers
+    //check if PC matches either values pointed to by IO call array pointers
     if (pc == *(this->io_1_array_ptr) && (this->io_1_array_ptr < this->io_1_traps + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_1_traps
         (this->io_1_array_ptr)++; //increment pointer to next value
         return 1;

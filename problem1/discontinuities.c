@@ -5,7 +5,7 @@
  *      Author: ray kim
  */
 
-
+#include "discontinuities.h"
 
 
 /* DISCONT_constructor
@@ -47,22 +47,8 @@ void DISCONT_ISR (DISCONT_STR_PTR self, CPU_p cpu_p) {
     PCB_setState(cpu_p->currentProcess, interrupted);
     
     
-    //determine if interrupt is caused by IO completion or timer
-    switch (self->interrupt) {
-        case timer: //FIXME does it make sense to have timer interrupt running while running IO completion handler???
-
-            //Upcall to specific interrupt handler
-            self->handler_func(cpu_p);
-            break;
-        case io:
-            //Upcall to specific interrupt handler
-            self->handler_func(cpu_p);
-            break;
-        default:
-            puts("Non supported interrupt type.");
-            exit();
-            break;
-    }
+    //run correct IO completion or timer handler
+    self->handler_func(cpu_p);
     
     //Put PC value from sysStack into pc
     cpu_p->pc = CPU_SysStack_pop(cpu_p); /********* IRET *********/
@@ -77,10 +63,9 @@ void DISCONT_ISR (DISCONT_STR_PTR self, CPU_p cpu_p) {
  * Calls the appropriate trap service handler
  *
  * params:  CPU_p           cpu
- *          unsigned int    device number
  * return: none
  */
-void DISCONT_TSR (CPU_p cpu_p, unsigned int call_device_num) {
+void DISCONT_TSR (DISCONT_STR_PTR self, CPU_p cpu_p) {
 
     //Put PC value into sysStack
     CPU_SysStack_push(cpu_p, cpu_p->pc);
@@ -88,19 +73,8 @@ void DISCONT_TSR (CPU_p cpu_p, unsigned int call_device_num) {
     //put current process' status into "blocked"
     cpu_p->currentProcess->state = blocked; //this should be done in handler
     
-    switch (call_device_num) {
-        case 1:
-            //TODO call trap service handler code here
-            //trap handler moves current process into queue for device
-            break;
-        case 2:
-            //TODO call trap service handler code here
-            break;
-        default:
-            puts("No such device.");
-            exit();
-            break;
-    }
+    //run correct IO service handler code
+    self->handler_func(cpu_p);
 
     //Put PC value from sysStack into pc
     cpu_p->pc = CPU_SysStack_pop(cpu_p); /********* IRET *********/

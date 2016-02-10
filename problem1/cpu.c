@@ -5,6 +5,8 @@
  *      Author: nabilfadili, raykim
  */
 
+#include "cpu.h"
+
 unsigned int G_NEW_PROC_ID = 0;
 
 //FILE *fp;
@@ -14,8 +16,7 @@ unsigned int G_NEW_PROC_ID = 0;
  * --------------------
  *
  */
-
-void mainLoop(CPU_p self) {
+void CPU_cycle(CPU_p self, DISCONT_STR_PTR timerInterruptHandler, DISCONT_STR_PTR IOCompletionInterruptHandler, DISCONT_STR_PTR IO_device_1, DISCONT_STR_PTR IO_device_2) {
 
 	/*File I/O*/
 //	fp = fopen("scheduleTrace.txt", "w+");
@@ -51,9 +52,6 @@ void mainLoop(CPU_p self) {
             PCB_setState(self->currentProcess, running);
         }
 
-        //pseudo-push PC to the system stack (interrupt does this in reality)
-        CPU_SysStack_push(self, self->pc);
-
         /*****************************************/
         /* Simulated Fetch, Decode, Execute Cycle /
         /*****************************************/
@@ -70,8 +68,7 @@ void mainLoop(CPU_p self) {
         
         //TODO check if timer interrupt has occured in if statement
         
-        DISCONT_STR_PTR timerInterruptHandler = (DISCONT_STR_PTR) malloc(sizeof(DISCONT_STR));
-        timerInterruptHandler = DISCONT_constructor(0, timer, TIMER_scheduler);
+        
         DISCONT_ISR(timerInterruptHandler, self); //call interrupt service routine
 
         
@@ -81,15 +78,15 @@ void mainLoop(CPU_p self) {
 
         //TODO check if IO completion interrupt has cocured in if statement
         
-        DISCONT_STR_PTR IOCompletionInterruptHandler = (DISCONT_STR_PTR) malloc(sizeof(DISCONT_STR));
-        IOCompletionInterruptHandler = DISCONT_constructor(1, io, IO_x_handler);
         DISCONT_ISR(IOCompletionInterruptHandler, self); //call interrupt service routine
         
         /*****************************************/
-        /******* Call trap service handler *******/
+        /****** Call IO trap service handler *****/
         /*****************************************/
-        if (call_device_num != 0) {
-            DISCONT_TSR(self, call_device_num);
+        if (call_device_num == 1) {
+            DISCONT_TSR(IO_device_1, self);
+        } else {
+            DISCONT_TSR(IO_device_2, self);
         }
         
         /*****************************************/
@@ -113,7 +110,7 @@ void mainLoop(CPU_p self) {
             //bring in new process from readyqueue
             self->currentProcess = priority_dequeue(self->readyQueue);
             if (self->currentProcess == NULL)
-                exit();
+                return;
             self->pc = self->currentProcess->addressPC;
         }
 
@@ -290,8 +287,6 @@ void CPU_dispatcher(CPU_p self) {
 }
 
 int main() {
-    CPU_p cpu = CPU_constructor();
-    
 //    printf(CPU_toString(cpu));
 
 //    unsigned int testPC = 3000;
@@ -302,7 +297,26 @@ int main() {
 //    CPU_readyQueue_enqueue(cpu, testEnqueuePCB);
 //    PCB_p testDequeuePCB = CPU_readyQueue_dequeue(cpu);
 //    printf("\nDequeue PCB Test: %s\n", PCB_toString(testDequeuePCB));
-    mainLoop(cpu);
+    
+    //create interrupt objects
+    CPU_p cpu = CPU_constructor();
+    DISCONT_STR_PTR timerInterruptHandler;
+    DISCONT_STR_PTR IOCompletionInterruptHandler;
+    DISCONT_STR_PTR keyboard_trap_handler;
+    DISCONT_STR_PTR monitor_trap_handler;
+    
+    //TODO swap out function names with actual API function names
+    timerInterruptHandler = DISCONT_constructor(0, timer, CPU_scheduler);
+    IOCompletionInterruptHandler = DISCONT_constructor(1, io_completion, IO_interrupt_handler);
+    keyboard_trap_handler = DISCONT_constructor(101, io_handler, IO_x_handler);
+    monitor_trap_handler = DISCONT_constructor(102, io_handler, IO_x_handler);
+
+    //run processes (will run infinitely if there's a PCB with terminate = 0)
+    CPU_cycle(cpu, timerInterruptHandler, IOCompletionInterruptHandler, keyboard_trap_handler, monitor_trap_handler);
+    
+    //destroy objects
+    DISCONT_destructor(timerInterruptHandler);
+    DISCONT_destructor(IOCompletionInterruptHandler);
     CPU_destructor(cpu);
     exit(0);
 }

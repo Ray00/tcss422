@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "pcb.h"
+
 
 //#define NUMREGS 16
 #define MAX_PC 2345
@@ -42,6 +42,7 @@ typedef PCB *PCB_p;
 
 /* Prototypes */
 PCB_p PCB_constructor(unsigned int, unsigned int, enum state_type, unsigned int, unsigned int, unsigned int);
+void PCB_create_trap_call_array (unsigned int *, unsigned int *);
 PCB_p PCB_constructorWithEmpty(void);
 void PCB_destructor(PCB_p);
 void PCB_setProcessNumber(PCB_p, unsigned int);
