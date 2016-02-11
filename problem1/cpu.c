@@ -6,20 +6,16 @@
  */
 
 #include "cpu.h"
+#include "discontinuities.h"
 
-unsigned int G_NEW_PROC_ID = 0;
-
-//FILE *fp;
+unsigned int GLOBAL_NEW_PROC_ID = 0;
 
 /*
  * Function:  Main
  * --------------------
  *
  */
-void CPU_cycle(CPU_p self, DISCONT_STR_PTR timerInterruptHandler, DISCONT_STR_PTR IOCompletionInterruptHandler, DISCONT_STR_PTR IO_device_1, DISCONT_STR_PTR IO_device_2) {
-
-	/*File I/O*/
-//	fp = fopen("scheduleTrace.txt", "w+");
+void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOCompletionInterrupt, DISCONT_STR_p IO_device_1, DISCONT_STR_p IO_device_2) {
 
     /* round robin simulation */
     while (1) {
@@ -28,28 +24,26 @@ void CPU_cycle(CPU_p self, DISCONT_STR_PTR timerInterruptHandler, DISCONT_STR_PT
         /********* Create new processes **********/
         /*****************************************/
         //create up to 5 new processes
-        if (G_NEW_PROC_ID < 30) {
-            createNewProcesses(self);
+        if (GLOBAL_NEW_PROC_ID < 30) {
+            createNewProcesses(this);
         }
         
-        //add newly created processes in self->createdQueue to self->readyQueue
-        while (FIFO_size(self->createdQueue) != 0) {
-            PCB_p temp_pcb_p = FIFO_dequeue(self->createdQueue);
+        //add newly created processes in this->createdQueue to this->readyQueue
+        while (FIFO_size(this->createdQueue) != 0) {
+            PCB_p temp_pcb_p = FIFO_dequeue(this->createdQueue);
             PCB_setState(temp_pcb_p, ready);
-            FIFO_enqueue(self->readyQueue, temp_pcb_p);
+            FIFO_enqueue(this->readyQueue, temp_pcb_p);
 
             printf("Process ID: %u Enqueued\n", temp_pcb_p->process_num); //print message that process has been enqueued
-//            fprintf(fp, "Process ID: %u Enqueued\n", temp_pcb_p->process_num); //output to file
 
             puts(PCB_toString(temp_pcb_p)); //print PCB contents
-//            fprintf(fp, "%s", PCB_toString(temp_pcb_p)); //output PCB contents
-//            fprintf(fp, "\n");
+
         }
         
         //if current process is IDLE and processes available in readyQueue, load first process in readyQueue into CPU
-        if (self->currentProcess == NULL && FIFO_size(self->readyQueue) > 0) {
-            self->currentProcess = FIFO_dequeue(self->readyQueue);
-            PCB_setState(self->currentProcess, running);
+        if (this->currentProcess == NULL && FIFO_size(this->readyQueue) > 0) {
+            this->currentProcess = FIFO_dequeue(this->readyQueue);
+            PCB_setState(this->currentProcess, running);
         }
 
         /*****************************************/
@@ -57,7 +51,7 @@ void CPU_cycle(CPU_p self, DISCONT_STR_PTR timerInterruptHandler, DISCONT_STR_PT
         /*****************************************/
 
         //check if current PC matches with any IO calls in the 2 IO traps arrays
-        unsigned int call_device_num = PCB_currPCHasIOCall(self->currentProcess, self->pc);
+        unsigned int call_device_num = PCB_currPCHasIOCall(this->currentProcess, this->pc);
         
         //FUTURE TODO add Fetch Decode Execute instructions
         
@@ -66,68 +60,87 @@ void CPU_cycle(CPU_p self, DISCONT_STR_PTR timerInterruptHandler, DISCONT_STR_PT
         /********* Check Timer Interrupt *********/
         /*****************************************/
         
-        //TODO check if timer interrupt has occured in if statement
-        
-        
-        DISCONT_ISR(timerInterruptHandler, self); //call interrupt service routine
-
+        if (TIMER_updateCheckCompletion(this->timer)) {
+            //Put PC value into sysStack
+            STACK_push(this->sysStack, this->pc);
+            
+            DISCONT_ISR(timerInterrupt, this); //call interrupt service routine
+            
+            //Put PC value from sysStack into pc
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+        }
         
         /*****************************************/
         /**** Check I/O Completion Interrupts ****/
         /*****************************************/
 
-        //TODO check if IO completion interrupt has cocured in if statement
+        //the two ifs below are poorly coded, but can't find a way around it without creating another function
+        if (IO_updateCheckCompletion(IO_device_1)) {
+            STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
+            DISCONT_setInterruptingDevice(IO_device_1, this);
+            DISCONT_ISR(IOCompletionInterrupt, this); //call ISR
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+        }
         
-        DISCONT_ISR(IOCompletionInterruptHandler, self); //call interrupt service routine
+        if (IO_updateCheckCompletion(IO_device_2)) {
+            STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
+            DISCONT_setInterruptingDevice(IO_device_2, this);
+            DISCONT_ISR(IOCompletionInterrupt, this);
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+        }
         
         /*****************************************/
         /****** Call IO trap service handler *****/
         /*****************************************/
         if (call_device_num == 1) {
-            DISCONT_TSR(IO_device_1, self);
-        } else {
-            DISCONT_TSR(IO_device_2, self);
+            STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
+            DISCONT_TSR(IO_device_1, this);
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+        } else if (call_device_num == 2) {
+            STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
+            DISCONT_TSR(IO_device_2, this);
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
         }
         
         /*****************************************/
         /* PC increment & process termination check /
         /*****************************************/
         
-        self->pc += 1; //increment cpu pc
+        this->pc += 1; //increment cpu pc
         
         //see if pc has incremented over MAX_PC
-        if (self->pc > self->currentProcess->max_pc) {
-            self->pc = 0;
-            PCB_incrementTermCount(self->currentProcess);
+        if (this->pc > this->currentProcess->max_pc) {
+            this->pc = 0;
+            PCB_incrementTermCount(this->currentProcess);
         }
         
         //if process has run full course, move to termination stack
-        if (PCB_checkTerminate(self->currentProcess)) {
-            PCB_terminate(self->currentProcess);
+        if (PCB_checkTerminate(this->currentProcess)) {
+            PCB_terminate(this->currentProcess);
             //move process to termination queue
-            self->currentProcess->addressPC = self->pc;
-            priority_enqueue(self->terminatedQueue, self->currentProcess);
+            this->currentProcess->addressPC = this->pc;
+            FIFO_enqueue(this->terminatedQueue, this->currentProcess);
             //bring in new process from readyqueue
-            self->currentProcess = priority_dequeue(self->readyQueue);
-            if (self->currentProcess == NULL)
+            this->currentProcess = FIFO_dequeue(this->readyQueue);
+            if (this->currentProcess == NULL)
                 return;
-            self->pc = self->currentProcess->addressPC;
+            this->pc = this->currentProcess->addressPC;
         }
 
     }
 }
 
 
-void createNewProcesses(CPU_p self) {
+void createNewProcesses(CPU_p this) {
     int random_num_range_0_to_5 = rand() % 6; //create a random number of new processes, between 0 and 5
     
     //place random num processes into cpu_p->createdQueue
     for (int i = 1; i <= random_num_range_0_to_5; i++) {
         
-        G_NEW_PROC_ID += 1;
+        GLOBAL_NEW_PROC_ID += 1;
         
         //PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp)
-        FIFO_enqueue(self->createdQueue, PCB_constructor(G_NEW_PROC_ID, 1, new, 0, 0));
+        FIFO_enqueue(this->createdQueue, PCB_constructor(GLOBAL_NEW_PROC_ID, 1, new, 0, 0, 0));
     }
 }
 
@@ -135,10 +148,9 @@ CPU_p CPU_constructor(void) {
     srand((unsigned) time(NULL));
     CPU_p newCPU = (CPU_p) malloc(sizeof(CPU));
     //IDLE = PCB_constructor(G_NEW_PROC_ID, 999, idle, 0, 0);
-    newCPU->timer = 0;
+    newCPU->timer = TIMER_constructor();
     newCPU->pc = 0;
-    newCPU->sysStack = (unsigned int *) malloc(sizeof(unsigned int) * STACK_SIZE);
-    newCPU->sysStackPointer = newCPU->sysStack;
+    newCPU->sysStack = STACK_constructor(200);
     newCPU->currentProcess = NULL;
     /* queue instantiation */
     newCPU->readyQueue = FIFO_constructor();
@@ -148,175 +160,104 @@ CPU_p CPU_constructor(void) {
     return newCPU;
 }
 
-void CPU_destructor(CPU_p self) {
-    FIFO_destructor(self->readyQueue);
-    FIFO_destructor(self->createdQueue);
-    FIFO_destructor(self->terminatedQueue);
-    PCB_destructor(self->currentProcess);
-    free(self);
+void CPU_destructor(CPU_p this) {
+    TIMER_destructor(this->timer);
+    STACK_destructor(this->sysStack);
+    FIFO_destructor(this->readyQueue);
+    FIFO_destructor(this->createdQueue);
+    FIFO_destructor(this->terminatedQueue);
+    PCB_destructor(this->currentProcess);
+    free(this);
 }
 
-void CPU_setPC(CPU_p self, unsigned int pc) {
-    self->pc = pc;
+void CPU_setPC(CPU_p this, unsigned int pc) {
+    this->pc = pc;
 }
 
-unsigned int CPU_getPC(CPU_p self) {
-    return self->pc;
+unsigned int CPU_getPC(CPU_p this) {
+    return this->pc;
+}
+//
+//void CPU_SysStack_push(CPU_p this, unsigned int pc) {
+//    *(this->sysStackPointer) = pc;
+//    (this->sysStackPointer)++;
+//}
+//
+//unsigned int CPU_SysStack_pop(CPU_p this) {
+//    (this->sysStackPointer)--;
+//    return *(this->sysStackPointer);
+//}
+
+void CPU_setCurrentProcess(CPU_p this, PCB_p pcb) {
+    this->currentProcess = pcb;
 }
 
-void CPU_SysStack_push(CPU_p self, unsigned int pc) {
-    *(self->sysStackPointer) = pc;
-    (self->sysStackPointer)++;
+PCB_p CPU_getCurrentProcess(CPU_p this) {
+    return this->currentProcess;
 }
 
-unsigned int CPU_SysStack_pop(CPU_p self) {
-    (self->sysStackPointer)--;
-    return *(self->sysStackPointer);
+void CPU_readyQueue_enqueue(CPU_p this, PCB_p pcb) {
+    FIFO_enqueue(this->readyQueue, pcb);
 }
 
-void CPU_setCurrentProcess(CPU_p self, PCB_p pcb) {
-    self->currentProcess = pcb;
+PCB_p CPU_readyQueue_dequeue(CPU_p this) {
+    return FIFO_dequeue(this->readyQueue);
 }
 
-PCB_p CPU_getCurrentProcess(CPU_p self) {
-    return self->currentProcess;
+void CPU_createdQueue_enqueue(CPU_p this, PCB_p pcb) {
+    FIFO_enqueue(this->createdQueue, pcb);
 }
 
-void CPU_readyQueue_enqueue(CPU_p self, PCB_p pcb) {
-    FIFO_enqueue(self->readyQueue, pcb);
+PCB_p CPU_createdQueue_dequeue(CPU_p this) {
+    return FIFO_dequeue(this->createdQueue);
 }
 
-PCB_p CPU_readyQueue_dequeue(CPU_p self) {
-    return FIFO_dequeue(self->readyQueue);
+void CPU_terminatedQueue_enqueue(CPU_p this, PCB_p pcb) {
+    FIFO_enqueue(this->terminatedQueue, pcb);
 }
 
-void CPU_createdQueue_enqueue(CPU_p self, PCB_p pcb) {
-    FIFO_enqueue(self->createdQueue, pcb);
+PCB_p CPU_terminatedQueue_dequeue(CPU_p this) {
+    return FIFO_dequeue(this->terminatedQueue);
 }
 
-PCB_p CPU_createdQueue_dequeue(CPU_p self) {
-    return FIFO_dequeue(self->createdQueue);
-}
-
-void CPU_terminatedQueue_enqueue(CPU_p self, PCB_p pcb) {
-    FIFO_enqueue(self->terminatedQueue, pcb);
-}
-
-PCB_p CPU_terminatedQueue_dequeue(CPU_p self) {
-    return FIFO_dequeue(self->terminatedQueue);
-}
-
-char* CPU_toString(CPU_p self) {
+char* CPU_toString(CPU_p this) {
     char * result = (char *) malloc(sizeof(char) * 1000);
-    sprintf(result, "Current PC: %u\nCurrent sysStack: %d\nCurrent Process: \n"
-            "ReadyQueue Size: \nCreatedQueue Size: \nTerminatedQueue Size: \n", self->pc, self->sysStack);
+    sprintf(result, "Current PC: %u\nCurrent sysStack: %d\nCurrent Process: \nReadyQueue Size: \nCreatedQueue Size: \nTerminatedQueue Size: \n", this->pc, STACK_peek(this->sysStack));
     return result;
 }
 
-//void CPU_timerInterruptHandler(CPU_p self, enum interrupt_type itype) {
-//    //1.) Change the state of the running process to interrupted,
-//    PCB_setState(self->currentProcess, interrupted); 
-//    //2.) Save the CPU state to the PCB for that process (PC value)
-//    PCB_setPC(self->currentProcess, self->pc);
-//    //3.) Upcall to scheduler
-//    CPU_scheduler(self, itype);
-//    //4.) Put PC value from sysStack into pc
-//    self->pc = CPU_SysStack_pop(self); /********* IRET *********/
-//
-//    //5.) Return
-//    return;
-//}
-
-/******* the code below should be moved to timer class *******/
-void CPU_scheduler(CPU_p self) {
-
-    //1.) Change its state from interrupted to ready
-    self->currentProcess->state = ready;
-    //2.) Put the process back into the ready queue (if not idle process)
-    if (self->currentProcess != NULL) {
-        FIFO_enqueue(self->readyQueue, self->currentProcess);
-    }
-
-    //3.) Upcall to dispatcher
-    CPU_dispatcher(self);
-    //4.) Additional house keeping
-    //future TODO
-
-    //4.) Return - Chance to do more before returning but nothing yet
-    return;
-}
-
-/******* the code below should be moved to timer class *******/
-void CPU_dispatcher(CPU_p self) {
-    PCB_p next_process_p = FIFO_dequeue(self->readyQueue);
-    PCB_p last_process_p = self->currentProcess;
-
-    //1.) Save the state of the current process into its PCB (here we mean the PC value)
-    /*NOT SURE WHY WE NEED TO DO THIS AGAIN?*/
-
-    //every fourth context switch
-    if (G_LOOP_ITER_NUM % 4 == 0) {
-        printf("Interrupted Process: %s", PCB_toString(last_process_p)); //print the contents of the running process
-        printf("Switching to: %s\n", PCB_toString(next_process_p)); //print contents of the ready queue head PCB
-
-        fprintf(fp, "Interrupted Process: %s", PCB_toString(last_process_p)); //output contents of running process
-        fprintf(fp, "Switching to: %s\n", PCB_toString(next_process_p)); //output contents of ready queue head
-    }
-    //Put PC value from sysStack into last running process that has been placed into the readyqueue in the scheduler function
-    PCB_setPC(cpu_p->currentProcess, CPU_SysStack_pop(cpu_p));
-    //2.) Dequeue the next waiting process (PCB)
-    self->currentProcess = next_process_p;
-    //3.) Change its state to running
-    PCB_setState(self->currentProcess, running);
-    //4.) Copy its PC value (and SW if you implement it) to the SysStack location to replace the PC of the interrupted process
-    CPU_SysStack_push(self, PCB_getPC(self->currentProcess));
-
-    //after context switch
-    if (G_LOOP_ITER_NUM % 4 == 0) {
-        printf("Last Process: %s", PCB_toString(last_process_p)); //print the contents of the last process
-        printf("Current Process: %s", PCB_toString(next_process_p)); //print contents of current process
-        printf("Ready Queue: %s\n\n", FIFO_toString(self->readyQueue));
-
-        fprintf(fp, "Last Process: %s", PCB_toString(last_process_p)); //print the contents of the last process
-        fprintf(fp, "Current Process: %s", PCB_toString(next_process_p)); //print contents of current process
-        fprintf(fp, "Ready Queue: %s\n\n", FIFO_toString(self->readyQueue));
-    }
-
-    //5.) Return
-    return;
-}
 
 int main() {
-//    printf(CPU_toString(cpu));
-
-//    unsigned int testPC = 3000;
-//    CPU_setPC(cpu, testPC);
-//    printf("\nsetPC Test: %u", CPU_getPC(cpu));
-
-//    PCB_p testEnqueuePCB = PCB_constructorWithEmpty();
-//    CPU_readyQueue_enqueue(cpu, testEnqueuePCB);
-//    PCB_p testDequeuePCB = CPU_readyQueue_dequeue(cpu);
-//    printf("\nDequeue PCB Test: %s\n", PCB_toString(testDequeuePCB));
     
     //create interrupt objects
     CPU_p cpu = CPU_constructor();
-    DISCONT_STR_PTR timerInterruptHandler;
-    DISCONT_STR_PTR IOCompletionInterruptHandler;
-    DISCONT_STR_PTR keyboard_trap_handler;
-    DISCONT_STR_PTR monitor_trap_handler;
+    DISCONT_STR_p timerInterrupt;
+    DISCONT_STR_p IOCompletionInterrupt;
+    DISCONT_STR_p keyboard_trap_handler;
+    DISCONT_STR_p monitor_trap_handler;
     
-    //TODO swap out function names with actual API function names
-    timerInterruptHandler = DISCONT_constructor(0, timer, CPU_scheduler);
-    IOCompletionInterruptHandler = DISCONT_constructor(1, io_completion, IO_interrupt_handler);
-    keyboard_trap_handler = DISCONT_constructor(101, io_handler, IO_x_handler);
-    monitor_trap_handler = DISCONT_constructor(102, io_handler, IO_x_handler);
+    timerInterrupt = DISCONT_constructor(0, timer);
+    IOCompletionInterrupt = DISCONT_constructor(1, io_completion);
+    DISCONT_STR_p io_device_1 = DISCONT_constructor(2, io_handler_1);
+    DISCONT_STR_p io_device_2 = DISCONT_constructor(3, io_handler_2);
+    
+    IO_STR_p keyboard_trap = IO_constructor();
+    IO_STR_p monitor_trap = IO_constructor();
+    
+    //set place keyboard/monitor trap objects into discont wrappers
+    DISCONT_setInterruptingDevice(io_device_1, keyboard_trap);
+    DISCONT_setInterruptingDevice(io_device_2, monitor_trap);
 
     //run processes (will run infinitely if there's a PCB with terminate = 0)
-    CPU_cycle(cpu, timerInterruptHandler, IOCompletionInterruptHandler, keyboard_trap_handler, monitor_trap_handler);
+    CPU_cycle(cpu, timerInterrupt, IOCompletionInterrupt, io_device_1, io_device_2);
     
     //destroy objects
-    DISCONT_destructor(timerInterruptHandler);
-    DISCONT_destructor(IOCompletionInterruptHandler);
+    DISCONT_destructor(timerInterrupt);
+    DISCONT_destructor(IOCompletionInterrupt);
+    DISCONT_destructor(io_device_1);
+    DISCONT_destructor(io_device_2);
+    IO_destructor(keyboard_trap);
+    IO_destructor(monitor_trap);
     CPU_destructor(cpu);
     exit(0);
 }

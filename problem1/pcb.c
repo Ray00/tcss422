@@ -45,15 +45,17 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
         result->creation = timeinfo;
 
         //create I/O trap call arrays
-        PCB_create_IO_call_array(result->io_1_traps, result->io_1_array_ptr);
-        PCB_create_IO_call_array(result->io_2_traps, result->io_2_array_ptr);
+        PCB_create_trap_call_array(result->io_1_traps, result->io_1_array_ptr);
+        PCB_create_trap_call_array(result->io_2_traps, result->io_2_array_ptr);
 
+    }
 
     return result;
+
 }
 
 
-/* Function: PCB_create_IO_call_array
+/* Function: PCB_create_trap_call_array
  * ------------------------
  * creates an array of instructions (randomly) at which I/O device traps are called
  *
@@ -79,7 +81,7 @@ void PCB_create_trap_call_array (unsigned int * trap_call_array, unsigned int * 
         //printf("%d\n", temp);
         check = 0;
         for (j = 0; j < i; j++) {
-            if (temp == traps1[j]) {
+            if (temp == trap_call_array[j]) {
                 check = 1;
             }
         }
@@ -97,8 +99,8 @@ void PCB_create_trap_call_array (unsigned int * trap_call_array, unsigned int * 
     temp = 0;
     for (i = 0; i < 4; i++) {
         for (j = i + 1; j < 4; j++) {
-            if (traps1[i] > traps1[j]) {
-                temp =  traps1[i];
+            if (trap_call_array[i] > trap_call_array[j]) {
+                temp =  trap_call_array[i];
                 trap_call_array[i] = trap_call_array[j];
                 trap_call_array[j] = temp;
             }
@@ -211,7 +213,7 @@ unsigned int PCB_checkTerminate(PCB_p this) {
     if (this->term_count == 0) {
         return 0;
     } else if (this->terminate == this->term_count) {
-        return 1
+        return 1;
     }
 
     return 0;
@@ -228,7 +230,7 @@ void PCB_terminate(PCB_p this) {
     timeinfo = localtime ( &rawtime );
 
     this->termination = timeinfo;
-    this->state = terminated;
+    this->state = halted;
 }
 
 

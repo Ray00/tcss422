@@ -54,7 +54,7 @@ int PCB_getPC(PCB_p);
 void PCB_setState(PCB_p, enum state_type);
 void PCB_terminate(PCB_p);
 void PCB_incrementTermCount(PCB_p);
-unsigned int PCB_currPCHasIOCall(unsigned int, PCB_p);
+unsigned int PCB_currPCHasIOCall(PCB_p, unsigned int);
 char * PCB_toString(PCB_p);
 
 #endif /* PCB_H_ */

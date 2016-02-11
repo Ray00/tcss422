@@ -13,35 +13,35 @@
 #include <stdio.h>
 #include "pcb.h"
 #include "fifoqueue.h"
-#include "discontinuities.h"
+#include "timer.h"
+#include "stack.h"
+#include "IO_x.h"
+
 
 #define MAX_PROC 30
-#define TIME_SLICE 10   // suppose TIME_SLICE is 10 ns
-#define STACK_SIZE 500
 
 typedef struct cpu_type {
+    TIMER_STR_p timer;
     unsigned int pc;
-    unsigned int * sysStack;
-    unsigned int * sysStackPointer;
+    STACK_STR_p sysStack;
     PCB_p currentProcess;
     PCB_QUEUE_STR_p readyQueue;					//fifoqueue
     PCB_QUEUE_STR_p createdQueue;				//fifoqueue
     PCB_QUEUE_STR_p terminatedQueue;			//fifoqueue
 } CPU;
-typedef CPU *CPU_p;
+typedef CPU * CPU_p;
 
 /*** global extern variables ***/
 extern int GLOBAL_TIMER_INTERRUPT;
 extern int GLOBAL_IO_COMPLETION_INTERRUPT;
+extern unsigned int GLOBAL_NEW_PROC_ID;
 
 /*** function pointer signature used for all handler functions ***/
-typedef void (*handler_fp)(PCB_P);
-
-enum interrupt_type {timer, io};
+//typedef void (*handler_fp)(PCB_P);
 
 
 /*** Construction Prototypes ****/
-void createNewProcesses(CPU_p)
+void createNewProcesses(CPU_p);
 CPU_p CPU_constructor(void);					//Instantiates CPU struct, including all the queues
 void CPU_destructor(CPU_p);						//Free's all memory related to the passed CPU object
 void CPU_setPC(CPU_p, unsigned int);			//pc setter
@@ -58,18 +58,6 @@ void CPU_terminatedQueue_enqueue(CPU_p, PCB_p);	//TQ_enqueue - queue of terminat
 PCB_p CPU_terminatedQueue_dequeue(CPU_p);		//TQ_dequeue - queue of terminated PCB's
 
 /*Function Prototypes*/
-void CPU_timerInterruptHandler(CPU_p, enum interrupt_type);
-//1.) Change the state of the running process to interrupted,
-//2.) Save the CPU state to the PCB for that process (PC value)
-//3.) Upcall to scheduler
-//4.) Put PC value from sysStack into pc
-//5.) Return
-
-void CPU_scheduler(CPU_p, enum interrupt_type);
-//1.) Put the process back into the ready queue
-//2.) Change its state from interrupted to ready
-//3.) Upcall to dispatcher
-//4.) Return - Chance to do more before returning but nothing yet
 
 void CPU_dispatcher(CPU_p);
 //1.) Save the state of the current process into its PCB (here we mean the PC value)
