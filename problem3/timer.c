@@ -11,6 +11,7 @@ Timer_p Timer_constructor() {
     Timer_p me = malloc(sizeof(struct timer_struct));
     me->timer = TIME_SLICE;
     me->totalTime = 0;
+    return me;
 }
 
 void Timer_destructor(Timer_p me) {

@@ -15,8 +15,6 @@
 #include "IO.h"
 #include <stdio.h>
 
-#define TIME_SLICE 10
-
 typedef struct cpu_struct {
     unsigned int timer;
     unsigned int pc;
@@ -27,14 +25,14 @@ typedef struct cpu_struct {
     PCB_QUEUE_STR_p terminateQueue;
 } *CPU_p;
 
-enum interrupt_type {timer, io1, io2};
+enum interrupt_type {timer, completion, trap};
 
 CPU_p CPU_constructor(void);
 void CPU_destructor(CPU_p);
-void CPU_ISR(CPU_p, enum interrupt_type);
+void CPU_ISR(CPU_p, enum interrupt_type, IO_p);
 void CPU_IRET(CPU_p);
-void CPU_scheduler(CPU_p, enum interrupt_type);
+void CPU_scheduler(CPU_p, enum interrupt_type, IO_p);
 void CPU_dispatcher(CPU_p);
-void mainLoop(CPU_p);
+void mainLoop(CPU_p, Timer_p, IO_p, IO_p);
 
 #endif /* CPU_h */

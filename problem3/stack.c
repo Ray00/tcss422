@@ -8,10 +8,12 @@
 #include "stack.h"
 
 Stack_p Stack_constructor(void) {
-    Stack me = malloc(sizeof(struct stack_struct));
+    Stack_p me = malloc(sizeof(struct stack_struct));
     if (me != NULL) {
+        me->data = malloc(sizeof(unsigned int) * STACK_MAX);
         me->size = 0;
     }
+    return me;
 }
 
 void Stack_destructor(Stack_p me) {

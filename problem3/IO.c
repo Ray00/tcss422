@@ -28,13 +28,13 @@ unsigned int IO_updateAndCheckCompletion(IO_p me) {
     if (me->current == NULL && FIFO_size(me->waitingQueue) > 0) {
         srand((unsigned) time(NULL));
         me->current = FIFO_dequeue(me->waitingQueue);
+        //the random number must be 3 - 5 times timer countdown
         me->count = (rand() / (RAND_MAX / 601)) + 900;
-    } else {
-        me->count--;
     }
-    if (me->current == NULL || me->count > 0) {
-        return 0;
-    } else if (me->count == 0) {
+    me->count--;
+    if (me->count == 0) {
         return 1;
+    } else {
+        return 0;
     }
 }

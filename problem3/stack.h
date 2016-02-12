@@ -7,10 +7,12 @@
 #ifndef STACK_H_
 #define STACK_H_
 
-#define STACK_MAX 500;
+#include <stdlib.h>
+
+#define STACK_MAX 500
 
 typedef struct stack_struct {
-    long data[STACK_MAX];
+    long *data;
     int size;
 } *Stack_p;
 

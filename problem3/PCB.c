@@ -44,16 +44,16 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
         // FIXME it is possible that it will occur infinity loop.
         while (i < 4) {
             temp = rand() / (RAND_MAX / 2345);
-            if (temp > io1_trap[i - 1]) {
-                io1_trap[i] = temp;
+            if (temp > result->io1_trap[i - 1]) {
+                result->io1_trap[i] = temp;
                 i++;
             }
         }
         i = 1;
         while (i < 4) {
             temp = rand() / (RAND_MAX / 2345);
-            if (temp > io2_trap[i - 1]) {
-                io2_trap[i] = temp;
+            if (temp > result->io2_trap[i - 1]) {
+                result->io2_trap[i] = temp;
                 i++;
             }
         }
@@ -187,6 +187,7 @@ char* getStateString(enum state_type state) {
         case running: return "running";
         case halted: return "halted";
         case interrupted: return "interrupted";
+        case terminated: return "terminated";
     }
 }
 

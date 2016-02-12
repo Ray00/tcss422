@@ -9,6 +9,9 @@
 #define IO_H_
 
 #include <time.h>
+#include <stdlib.h>
+#include "PCB.h"
+#include "fifoqueue.h"
 
 typedef struct IO_struct {
     unsigned int count;

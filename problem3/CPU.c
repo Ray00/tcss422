@@ -36,47 +36,65 @@ void CPU_destructor(CPU_p me) {
     free(me);
 }
 
-void CPU_ISR(CPU_p me, enum interrupt_type itype) {
+void CPU_ISR(CPU_p me, enum interrupt_type itype, IO_p io) {
     PCB_setState(me->current, interrupted);
-    PCB_setSW(me->current, Stack_pop(me->sysStack));
-    PCB_setPC(me->current, Stack_pop(me->sysStack));
-    CPU_scheduler(me, itype);
+    long sw = Stack_pop(me->sysStack);
+    long pc = Stack_pop(me->sysStack);
+    if (sw > 0) {
+        PCB_setSW(me->current, (unsigned int) sw);
+    } else {
+        fprintf(stderr, "The stack is empty.\n");
+    }
+    if (pc > 0) {
+        PCB_setPC(me->current, (unsigned int) pc);
+    } else {
+        fprintf(stderr, "The stack is empty.\n");
+    }
+    CPU_scheduler(me, itype, io);
     CPU_IRET(me);
 }
 
 void CPU_IRET(CPU_p me) {
     Stack_pop(me->sysStack);
-    me->pc = Stack_pop(me->sysStack);
+    long pc = Stack_pop(me->sysStack);
+    if (pc > 0) {
+        me->pc = (unsigned int) pc;
+    } else {
+        fprintf(stderr, "The stack is empty.\n");
+    }
 }
 
-void CPU_trapServiceHandler(CPU_p me, IO_p io) {
-    PCB_setState(me->current, waiting);
-    PCB_setPC(me->current, me->pc);
-    FIFO_enqueue(io, me->current);
-    CPU_scheduler(me, ...);
-    CPU_IRET(me);
-}
+//void CPU_trapServiceHandler(CPU_p me, IO_p io) {
+//    PCB_setState(me->current, interrupted);
+//    PCB_setPC(me->current, me->pc);
+//    // PC_setSW(me->current, )
+//    CPU_scheduler(me, io);
+//    CPU_IRET(me);
+//}
 
-void CPU_scheduler(CPU_p me, enum interrupt_type itype) {
-    printf("Saving current state of processor to PCB:\n%s", PCB_toString(me->cur));
+void CPU_scheduler(CPU_p me, enum interrupt_type itype, IO_p io) {
+    printf("Saving current state of processor to PCB:\n%s", PCB_toString(me->current));
     if (itype == timer) {
         PCB_setState(me->current, ready);
         FIFO_enqueue(me->readyQueue, me->current);
         CPU_dispatcher(me);
-    }// else if (itype == io1) {
-    //     PCB_setState(myIO1->current, ready);
-    //     PCB_setState(me->current, ready);
-    //     FIFO_enqueue(me->readyQueue, myIO1->current);
-    // } else if (itype == io2) {
-    //     PCB_setState(me->current, waiting);
-    //     FIFO_enqueue(myIO2->waitingQueue, me->current);
-    //     CPU_dispatcher(me);
-    // }
+    } else if (itype == trap) {
+        PCB_setState(me->current, waiting);
+        FIFO_enqueue(io->waitingQueue, me->current);
+        CPU_dispatcher(me);
+    } else if (itype == completion) {
+        PCB_setState(io->current, ready);
+        FIFO_enqueue(me->readyQueue, io->current);
+        io->current = NULL;
+        PCB_setState(me->current, running);
+        // no need to call dispatcher // FIXME if my decision is wrong.
+    }
     // do some additional housekeeping
 }
 
 void CPU_dispatcher(CPU_p me) {
     //TODO 1.) Save the state of the current process into its PCB (here we mean the PC value)
+    // Don't know what this means (assignment 2)
     me->current = FIFO_dequeue(me->readyQueue);
     PCB_setState(me->current, running);
     Stack_push(me->sysStack, PCB_getPC(me->current));
@@ -86,16 +104,15 @@ void CPU_dispatcher(CPU_p me) {
 }
 
 void createNewProcess(CPU_p me) {
-
     unsigned int random_number_0_to_5;
     random_number_0_to_5 = rand() % 6;
     printf("random number %d\n", random_number_0_to_5);
     for (int i = 1; i <= random_number_0_to_5; i++) {
-        FIFO_enqueue(me->createdQueue, PCB_constructor(PCB_ID++, rand() / (RAND_MAX / 16), new, 0, 0));
+        FIFO_enqueue(me->createdQueue, PCB_constructor(PCB_ID++, rand() / (RAND_MAX / 16), new, 0, 0, 0));
     }
 }
 
-void mainLoop(CPU_p me) {
+void mainLoop(CPU_p me, Timer_p myTimer, IO_p myIO1, IO_p myIO2) {
 
     while(1) {
         // create a new PCB between 0 to 5
@@ -130,7 +147,7 @@ void mainLoop(CPU_p me) {
             // Timer interrupt handler occurs
             Stack_push(me->sysStack, me->pc); // before it occurs
             Stack_push(me->sysStack, me->current->addressSW);
-            CPU_ISR(me, timer);
+            CPU_ISR(me, timer, NULL);
         }
 
         /*****************************************/
@@ -138,13 +155,13 @@ void mainLoop(CPU_p me) {
         /*****************************************/
 
         //TODO check if IO completion interrupt has cocured in if statement
-        if (IO_updateAndCheckCompletion(IO1) || IO_updateAndCheckCompletion(IO2)) {
+        if (IO_updateAndCheckCompletion(myIO1) || IO_updateAndCheckCompletion(myIO2)) {
             Stack_push(me->sysStack, me->pc); // before it occurs
             Stack_push(me->sysStack, me->current->addressSW);
-            if (IO_updateAndCheckCompletion(IO1)) {
-                CPU_ISR(me, io1);
+            if (IO_updateAndCheckCompletion(myIO1)) {
+                CPU_ISR(me, completion, myIO1);
             } else {
-                CPU_ISR(me, io2);
+                CPU_ISR(me, completion, myIO2);
             }
         }
 
@@ -152,20 +169,20 @@ void mainLoop(CPU_p me) {
         /******* Call trap service handler *******/
         /*****************************************/
         for (int i = 0; i < 4; i++) {
-            if (me->pc == me->curent->io1_trap[i]) {
+            if (me->pc == me->current->io1_trap[i]) {
                 Stack_push(me->sysStack, me->pc);
                 Stack_push(me->sysStack, me->current->addressSW);
-                // CPU_ISR(me, io1);
+                CPU_ISR(me, trap, myIO1);
             }
-            if (me->pc == me->curent->io2_trap[i]) {
+            if (me->pc == me->current->io2_trap[i]) {
                 Stack_push(me->sysStack, me->pc);
                 Stack_push(me->sysStack, me->current->addressSW);
-                // CPU_ISR(me, io2);
+                CPU_ISR(me, trap, myIO2);
             }
         }
 
         /*****************************************/
-        /* Process termination check /
+        /* Process termination check *************/
         /*****************************************/
         //see if pc is over MAX_PC
         if (me->pc >= me->current->max_pc) {
@@ -177,7 +194,7 @@ void mainLoop(CPU_p me) {
         if (PCB_checkTerminate(me->current)) {
             PCB_terminate(me->current);
             //move process to termination queue
-            FIFO_enqueue(me->terminatedQueue, me->current);
+            FIFO_enqueue(me->terminateQueue, me->current);
             me->current = NULL;
         }
     }
@@ -188,7 +205,7 @@ int main() {
     myTimer = Timer_constructor();
     myIO1 = IO_constructor();
     myIO2 = IO_constructor();
-    mainLoop(cpu, cpuTimer, IO1, IO2);
+    mainLoop(cpu, myTimer, myIO1, myIO2);
     CPU_destructor(cpu);
     return 0;
 }

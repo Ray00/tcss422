@@ -7,6 +7,8 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
+#include <stdlib.h>
+
 #define TIME_SLICE 300
 
 typedef struct timer_struct {

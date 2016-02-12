@@ -36,7 +36,7 @@ typedef struct pcb_type {
 typedef PCB *PCB_p;
 
 /* Prototypes */
-PCB_p PCB_constructor(unsigned int, unsigned int, enum state_type, unsigned int, unsigned int);
+PCB_p PCB_constructor(unsigned int, unsigned int, enum state_type, unsigned int, unsigned int, unsigned int);
 PCB_p PCB_constructorWithEmpty(void);
 void PCB_destructor(PCB_p);
 void PCB_setProcessNumber(PCB_p, unsigned int);
