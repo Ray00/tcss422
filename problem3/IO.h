@@ -23,5 +23,4 @@ IO_p IO_constructor(void);
 void IO_destructor(IO_p);
 void IO_addProcess(IO_p, PCB_p);
 unsigned int IO_updateAndCheckCompletion(IO_p);
-
 #endif

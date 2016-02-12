@@ -52,5 +52,7 @@ void PCB_incrementTermCount(PCB_p);
 unsigned int PCB_checkTerminate(PCB_p);
 void PCB_terminate(PCB_p);
 char * PCB_toString(PCB_p);
+char * PCB_printCreatedTime(PCB_p);
+char * PCB_printTerminatedTime(PCB_p);
 
 #endif /* PCB_H_ */

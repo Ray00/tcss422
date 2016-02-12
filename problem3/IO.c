@@ -32,9 +32,8 @@ unsigned int IO_updateAndCheckCompletion(IO_p me) {
         me->count = (rand() / (RAND_MAX / 601)) + 900;
     }
     me->count--;
-    if (me->count == 0) {
+    if (me->current != NULL && me->count == 0) {
         return 1;
-    } else {
-        return 0;
     }
+    return 0;
 }

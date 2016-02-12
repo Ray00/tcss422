@@ -200,8 +200,26 @@ char* getStateString(enum state_type state) {
  * params:	PCB_p pointer to the PCB object in the heap.
  */
  char* PCB_toString(PCB_p me) {
-     char * result = (char *) malloc(sizeof(char) * 1000);
+     char * result = (char *) malloc(sizeof(char) * 100);
      sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %s, PC: 0x%04X, etc.\n",
              me->process_num, me->priority, getStateString(me->state), me->addressPC);
+     return result;
+ }
+
+ char* PCB_printCreatedTime(PCB_p me) {
+     char * result = (char *) malloc(sizeof(char) * 50);
+     sprintf(result, "Process created: PID %d at %s", me->process_num,
+                            asctime(me->creation));
+     return result;
+ }
+
+ char* PCB_printTerminatedTime(PCB_p me) {
+     char * result = (char *) malloc(sizeof(char) * 50);
+     if (me->termination != NULL) {
+         sprintf(result, "Process created: PID %d at %s", me->process_num,
+                                asctime(me->termination));
+     } else {
+         sprintf(result, "Process hasn't terminated yet.");
+     }     
      return result;
  }

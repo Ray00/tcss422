@@ -25,14 +25,14 @@ typedef struct cpu_struct {
     PCB_QUEUE_STR_p terminateQueue;
 } *CPU_p;
 
-enum interrupt_type {timer, completion, trap};
+enum interrupt_type {timer, completion, io1Trap, io2Trap};
 
 CPU_p CPU_constructor(void);
 void CPU_destructor(CPU_p);
-void CPU_ISR(CPU_p, enum interrupt_type, IO_p);
+void CPU_interuptServiceRoutine(CPU_p, enum interrupt_type, IO_p, FILE *);
 void CPU_IRET(CPU_p);
-void CPU_scheduler(CPU_p, enum interrupt_type, IO_p);
-void CPU_dispatcher(CPU_p);
-void mainLoop(CPU_p, Timer_p, IO_p, IO_p);
+void CPU_scheduler(CPU_p, enum interrupt_type, IO_p, FILE *);
+void CPU_dispatcher(CPU_p, FILE *);
+void mainLoop(CPU_p, Timer_p, IO_p, IO_p, FILE *);
 
 #endif /* CPU_h */
