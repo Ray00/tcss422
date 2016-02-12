@@ -311,5 +311,5 @@ unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
              break;
      }
 
-     sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %s, PC: 0x%04X\nCycles before termination: %d, Current cycle number: %d\n\n", this->process_num, this->priority, state_description, this->addressPC, this->terminate, this->term_count);
+     sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %s, PC: 0x%04X\nCycles before termination: %d, Current cycle number: %d\n", this->process_num, this->priority, state_description, this->addressPC, this->terminate, this->term_count);
  }

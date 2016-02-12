@@ -26,14 +26,16 @@ void IO_addProcess(IO_STR_p this, PCB_p pcb) {
 
 unsigned int IO_updateCheckCompletion(IO_STR_p this) {
     if (FIFO_size(this->waitingQueue) > 0) {
-
+        printf("IO blocked cycles: %d\n", this->elapsed_cycles);
         if (this->elapsed_cycles < IO_BLOCK_CYCLES) {
-            this->elapsed_cycles--;
+            this->elapsed_cycles++;
             return 0;
         } else {
             return 1;
         }
     }
+    
+    return 0;
 }
 
 PCB_p IO_dequeue_waitQueue(IO_STR_p this) {

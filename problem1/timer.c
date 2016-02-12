@@ -9,7 +9,7 @@
 #include "timer.h"
 
 TIMER_STR_p TIMER_constructor() {
-    TIMER_STR_p this = malloc(sizeof(TIMER_STR));
+    TIMER_STR_p this = (TIMER_STR_p) malloc(sizeof(TIMER_STR));
     this->elapsed_cycles = 0;
     return this;
 }
@@ -26,7 +26,7 @@ void TIMER_destructor(TIMER_STR_p this) {
  * return:  int            0 if process has cycles remaining, 1 if no cycles remaining
  */
 int TIMER_updateCheckCompletion(TIMER_STR_p this) {
-    this->elapsed_cycles++;
+    this->elapsed_cycles++; printf("timer elapsed cycles: %d\n", this->elapsed_cycles);
     if (this->elapsed_cycles > TIME_QUANTUM) {
         //reset timer for next process
         this->elapsed_cycles = 0;

@@ -103,6 +103,9 @@ void DISCONT_TSR (DISCONT_STR_p this, CPU_p cpu_p) {
     //place current process into device waitingQueue
     IO_addProcess(DISCONT_getInterruptingDevice(this), cpu_p->currentProcess);
     
+    //pop pc stored in sysStack into PCB of last running process (now in IO waitingQueue)
+    PCB_setPC(cpu_p->currentProcess, STACK_pop(cpu_p->sysStack));
+    
     //schedule must now grab a process from the readyQueue and make it the actively running process
     DISCONT_scheduler(this, cpu_p);
     
@@ -169,7 +172,7 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
             //4.) Additional house keeping
             //future TODO
             break;
-        case io_completion:
+        case io_completion: printf("%d\n\n", this->interrupting_device->elapsed_cycles);
             unblocked_process = IO_dequeue_waitQueue(DISCONT_getInterruptingDevice(this));
             FIFO_enqueue(cpu_p->readyQueue, unblocked_process);
             break;
@@ -178,6 +181,7 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
             cpu_p->currentProcess = FIFO_dequeue(cpu_p->readyQueue);
             //push pc of newly dequeued readyQueue process int sysStack
             if (cpu_p->currentProcess != NULL) {
+                PCB_setState(cpu_p->currentProcess, running);
                 STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));
             } else {
                 STACK_push(cpu_p->sysStack, 0);
@@ -214,10 +218,15 @@ void DISCONT_dispatcher(CPU_p cpu_p) {
     PCB_setPC(cpu_p->currentProcess, STACK_pop(cpu_p->sysStack));
     //2.) Dequeue the next waiting process (PCB)
     cpu_p->currentProcess = next_process_p;
-    //3.) Change its state to running
-    PCB_setState(cpu_p->currentProcess, running);
-    //4.) Copy its PC value (and SW if you implement it) to the SysStack location to replace the PC of the interrupted process
-    STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));
+
+    if (cpu_p->currentProcess != NULL) { //if currentProcess is null(IDLE)
+        //3.) Change its state to running
+        PCB_setState(cpu_p->currentProcess, running);
+        //4.) Copy its PC value (and SW if you implement it) to the SysStack location to replace the PC of the interrupted process
+        STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));
+    } else {
+        STACK_push(cpu_p->sysStack, 0);
+    }
     
     //after context switch
     if (GLOBAL_NEW_PROC_ID % 4 == 0) {
@@ -225,7 +234,8 @@ void DISCONT_dispatcher(CPU_p cpu_p) {
         printf("Last Process: %s", message_buffer_p); //print the contents of the last process
         PCB_toString(next_process_p, message_buffer_p);
         printf("Current Process: %s", message_buffer_p); //print contents of current process
-        printf("Ready Queue: %s\n\n", FIFO_toString(cpu_p->readyQueue));
+        FIFO_toString(cpu_p->readyQueue, message_buffer_p);
+        printf("Ready Queue: %s\n\n", message_buffer_p);
     }
     
     free(message_buffer_p);

@@ -8,9 +8,9 @@
 #ifndef FIFO_QUEUE_H
 #define FIFO_QUEUE_H
 
-#include "pcb.h"
 #include <stdlib.h>
 #include <string.h>
+#include "pcb.h"
 
 //inner class
 typedef struct node_str {
@@ -44,6 +44,6 @@ int FIFO_enqueue(PCB_QUEUE_STR_p, PCB_p);
 PCB_p FIFO_dequeue(PCB_QUEUE_STR_p);
 unsigned int FIFO_size(PCB_QUEUE_STR_p);
 
-char * FIFO_toString(PCB_QUEUE_STR_p);
+char * FIFO_toString(PCB_QUEUE_STR_p, char *);
 
 #endif 

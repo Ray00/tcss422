@@ -199,8 +199,7 @@ unsigned int FIFO_size(PCB_QUEUE_STR_p self) {
  *  params: 	PCB_QUEUE_STR_p this, the underlying queue struct
  *  returns:	char * containing string
  */
-char * FIFO_toString(PCB_QUEUE_STR_p this) {
-    char * result = (char *) malloc(sizeof(char) * 1000);
+char * FIFO_toString(PCB_QUEUE_STR_p this, char * result) {
     NODE_STR_p cur = this->head_node;
     if (cur != NULL) {
         char pID[50] = "";

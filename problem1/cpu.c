@@ -59,9 +59,9 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             PCB_setState(this->currentProcess, running);
         }
         
-        /*****************************************/
-        /* Simulated Fetch, Decode, Execute Cycle /
-        /*****************************************/
+        /******************************************/
+        /* Simulated Fetch, Decode, Execute Cycle */
+        /******************************************/
         
         
         //check if current PC matches with any IO calls in the 2 IO traps arrays
@@ -81,7 +81,10 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             DISCONT_ISR(timerInterrupt, this); //call interrupt service routine
             
             //Put PC value from sysStack into pc
-            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            if (this->currentProcess != NULL)
+                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            else
+                STACK_pop(this->sysStack);
         }
         
         /*****************************************/
@@ -89,18 +92,24 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         /*****************************************/
 
         //the two ifs below are poorly coded, but can't find a way around it without creating another function
-        if (IO_updateCheckCompletion(IO_device_1)) {
+        if (IO_updateCheckCompletion(IO_device_1->interrupting_device)) {
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
-            DISCONT_setInterruptingDevice(IO_device_1, this);
+            DISCONT_setInterruptingDevice(IOCompletionInterrupt, IO_device_1->interrupting_device);
             DISCONT_ISR(IOCompletionInterrupt, this); //call ISR
-            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            if (this->currentProcess != NULL)
+                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            else
+                STACK_pop(this->sysStack);
         }
         
-        if (IO_updateCheckCompletion(IO_device_2)) {
+        if (IO_updateCheckCompletion(IO_device_2->interrupting_device)) {
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
-            DISCONT_setInterruptingDevice(IO_device_2, this);
+            DISCONT_setInterruptingDevice(IOCompletionInterrupt, IO_device_2->interrupting_device);
             DISCONT_ISR(IOCompletionInterrupt, this);
-            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            if (this->currentProcess != NULL)
+                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            else
+                STACK_pop(this->sysStack);
         }
         
         /*****************************************/
@@ -109,16 +118,22 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         if (call_device_num == 1) {
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
             DISCONT_TSR(IO_device_1, this);
-            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            if (this->currentProcess != NULL)
+                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            else
+                STACK_pop(this->sysStack);
         } else if (call_device_num == 2) {
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
             DISCONT_TSR(IO_device_2, this);
-            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            if (this->currentProcess != NULL)
+                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+            else
+                STACK_pop(this->sysStack);
         }
         
-        /*****************************************/
-        /* PC increment & process termination check /
-        /*****************************************/
+        /********************************************/
+        /* PC increment & process termination check */
+        /********************************************/
         
         this->pc += 1; //increment cpu pc
         
@@ -141,6 +156,9 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             this->pc = this->currentProcess->addressPC;
         }
 
+        //print ready queue status
+        FIFO_toString(this->readyQueue, message_buffer_p);
+        printf("Ready Queue: %s\n\n", message_buffer_p);
     }
 }
 
