@@ -34,7 +34,6 @@ unsigned int IO_updateCheckCompletion(IO_STR_p this) {
             return 1;
         }
     }
-    return 0;
 }
 
 PCB_p IO_dequeue_waitQueue(IO_STR_p this) {
