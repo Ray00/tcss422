@@ -101,6 +101,8 @@ void DISCONT_TSR (DISCONT_STR_p this, CPU_p cpu_p) {
     PCB_setState(cpu_p->currentProcess, waiting);
     
     //place current process into device waitingQueue
+    IO_STR_p interruptingDevice = DISCONT_getInterruptingDevice(this);
+    printf(", PID %u put into waiting queue", cpu_p->currentProcess->process_num);
     IO_addProcess(DISCONT_getInterruptingDevice(this), cpu_p->currentProcess);
     
     //pop pc stored in sysStack into PCB of last running process (now in IO waitingQueue)
@@ -159,7 +161,6 @@ void DISCONT_TSR (DISCONT_STR_p this, CPU_p cpu_p) {
  */
 void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
     PCB_p unblocked_process;
-    
     switch (this->vector) {
         case timer:
             //1.) Change its state from interrupted to ready
@@ -172,14 +173,17 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
             //4.) Additional house keeping
             //future TODO
             break;
-        case io_completion: printf("%d\n\n", this->interrupting_device->elapsed_cycles);
+        case io_completion:
+//        	printf("%d\n\n", this->interrupting_device->elapsed_cycles);
             unblocked_process = IO_dequeue_waitQueue(DISCONT_getInterruptingDevice(this));
+            printf(", PID %u put in ready queue\n", unblocked_process->process_num);
             FIFO_enqueue(cpu_p->readyQueue, unblocked_process);
             break;
         default: //io trap handler
             //grab new process to run
             cpu_p->currentProcess = FIFO_dequeue(cpu_p->readyQueue);
             //push pc of newly dequeued readyQueue process int sysStack
+            printf(", PID %u dispatched\n", cpu_p->currentProcess->process_num);
             if (cpu_p->currentProcess != NULL) {
                 PCB_setState(cpu_p->currentProcess, running);
                 STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));

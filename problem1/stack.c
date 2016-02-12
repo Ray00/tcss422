@@ -28,8 +28,8 @@ void STACK_push(STACK_STR_p this, unsigned int data) {
     if (this->pointer_index < this->array_size) {
         this->data_array[this->pointer_index] = data;
         this->pointer_index++;
-        printf("stack elements: %d\n", this->pointer_index);
-        printf("stack size: %d\n", this->array_size);
+//        printf("stack elements: %d\n", this->pointer_index);
+//        printf("stack size: %d\n", this->array_size);
     } else {
         puts("Error: cannot push more elements onto stack, stack is full");
         exit(1);
