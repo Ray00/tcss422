@@ -14,7 +14,7 @@
 #include "fifoqueue.h"
 
 typedef struct IO_struct {
-    unsigned int count;
+    int count;
     PCB_p current;
     PCB_QUEUE_STR_p waitingQueue;
 } *IO_p;

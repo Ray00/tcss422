@@ -165,7 +165,7 @@ void mainLoop(CPU_p me, Timer_p myTimer, IO_p myIO1, IO_p myIO2, FILE *outPut) {
         /*****************************************/
 
         //TODO check if IO completion interrupt has cocured in if statement
-        if (IO_updateAndCheckCompletion(myIO1) || IO_updateAndCheckCompletion(myIO2)) {
+        if (IO_updateAndCheckCompletion(myIO1) == 1 || IO_updateAndCheckCompletion(myIO2) == 1) {
             Stack_push(me->sysStack, me->pc); // before it occurs
             Stack_push(me->sysStack, me->current->addressSW);
             if (IO_updateAndCheckCompletion(myIO1)) {
