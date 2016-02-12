@@ -15,6 +15,7 @@ STACK_STR_p STACK_constructor(unsigned int stack_size) {
         this->pointer_index = 0;
         this->array_size = stack_size;
     }
+    return this;
 }
 
 void STACK_destructor(STACK_STR_p this) {

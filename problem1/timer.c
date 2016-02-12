@@ -11,6 +11,7 @@
 TIMER_STR_p TIMER_constructor() {
     TIMER_STR_p this = malloc(sizeof(TIMER_STR));
     this->elapsed_cycles = 0;
+    return this;
 }
 
 void TIMER_destructor(TIMER_STR_p this) {
