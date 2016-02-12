@@ -1,9 +1,15 @@
-/*
- * pcb_test.c
- *
- *  Created on: Jan 8, 2016
- *      Author: nabilfadili
- */
+/***************************************************************************
+* pcb_test.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include <stdlib.h>
 #include <time.h>

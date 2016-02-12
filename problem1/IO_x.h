@@ -1,10 +1,15 @@
-//
-//  IO_x.h
-//
-//  Created by Khoa Doan on 2/07/16.
-//  Copyright © 2016 Khoa Doan. All rights reserved.
-//  modified by ray
-//
+/***************************************************************************
+* IO_x.h
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #ifndef IO_x_H_
 #define IO_x_H_

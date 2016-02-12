@@ -1,9 +1,15 @@
-/*
- * fifoqueue.c
- *
- *  Created on: Jan 7, 2016
- *      Author: Ray Kim
- */
+/***************************************************************************
+* fifoqueue.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include "fifoqueue.h"
 
@@ -12,12 +18,12 @@
  * --------------------
  * constructs a node object which contains the PCB address and pointer
  * to the next node in the FIFO queue
- *  
+ *
  *  params: 	PCB_p pointer to underlying PCB
  *  returns: 	NODE_STR_p pointer to node object
  */
 NODE_STR_p NODE_constructor(PCB_p pcb_pointer){
-	
+
 	NODE_STR_p node_pointer = (NODE_STR_p) malloc(sizeof(NODE_STR));
 
 	//set pcb_addr to pcb_pointer
@@ -92,16 +98,16 @@ int FIFO_destructor(PCB_QUEUE_STR_p this){
 //		free(temp_node_p);
 //		freed_nodes += 1;
 //	}
-    
+
     while (this->head_node != NULL) {
         free(FIFO_dequeue(this)); // freeing node by using destructor function.
-        
+
         freed_nodes++;
     }
-    
+
     //destroy this->free_node
     free(this->free_node);
-    
+
 	return freed_nodes;
 
 }
@@ -119,21 +125,21 @@ int FIFO_destructor(PCB_QUEUE_STR_p this){
  *  returns:	int function exit status code
  */
 int FIFO_enqueue(PCB_QUEUE_STR_p this, PCB_p pcb_p){
-    
+
     NODE_STR_p node_pointer = this->free_node;
-    
+
     //check if free_node in "this" is available
     if (node_pointer != NULL) {
         //make sure free_node is no longer available in next enqueue call
         this->free_node = NULL;
-        
+
         node_pointer->pcb_addr = pcb_p; //save pcb to free_node
         node_pointer->next_node = NULL;
     } else {
         node_pointer = NODE_constructor(pcb_p);
     }
-    
-    
+
+
 	//if num of nodes in this is 0, set passed in node as head and tail
 	if (this->num_nodes == 0) {
 		this->head_node = node_pointer;
@@ -163,7 +169,7 @@ PCB_p FIFO_dequeue(PCB_QUEUE_STR_p this){
 
 	NODE_STR_p return_node_p = this->head_node;
     PCB_p return_pcb_p = NULL;
-    
+
 	//return NULL if queue is empty
 	if (this->num_nodes < 1 || return_node_p == NULL) {
 		return NULL;
@@ -182,7 +188,7 @@ PCB_p FIFO_dequeue(PCB_QUEUE_STR_p this){
     } else {
         free(return_node_p);
     }
-    
+
 	return return_pcb_p;
 }
 

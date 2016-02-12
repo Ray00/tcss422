@@ -1,11 +1,15 @@
-/*
- * discontinuities.h
- *
- *  Created on: Feb 6, 2016
- *      Author: ray kim
- *
- *  stack overflow: 1350376
- */
+/***************************************************************************
+* discontinuities.h
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #ifndef DISCONTINUITIES_H
 #define DISCONTINUITIES_H
@@ -30,7 +34,7 @@ typedef struct discontinuities_str {
     Interrupt_type interrupt;
     IO_STR_p interrupting_device;
     //void (*handler_fp)(CPU_P); //pointer to handler function
-    
+
 } DISCONT_STR;
 typedef DISCONT_STR * DISCONT_STR_p;
 

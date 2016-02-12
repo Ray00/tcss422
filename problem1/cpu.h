@@ -1,10 +1,15 @@
-/*
- * cpu.h
- *
- *  Created on: Jan 22, 2016
- *      Author: nabilfadili
- *      Edited by: ray
- */
+/***************************************************************************
+* cpu.h
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #ifndef CPU_H_
 #define CPU_H_

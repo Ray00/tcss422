@@ -1,9 +1,15 @@
-//
-//  fifoqueue_test.c
-//
-//  Created by Khoa Doan on 1/7/16. Modified by Ray Kim on 1/13/16
-//  Copyright © 2016 Khoa Doan. All rights reserved.
-//
+/***************************************************************************
+* fifoqueue_test.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include "fifoqueue.h"
 #include <time.h>

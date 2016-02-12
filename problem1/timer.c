@@ -1,10 +1,15 @@
-//
-//  timer.c
-//
-//  Created by Khoa Doan on 2/07/16.
-//  Copyright © 2016 Khoa Doan. All rights reserved.
-//  modified by ray
-//
+/***************************************************************************
+* timer.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include "timer.h"
 
@@ -47,5 +52,3 @@ int TIMER_updateCheckCompletion(TIMER_STR_p this) {
 void TIMER_reset(TIMER_STR_p this) {
     this->elapsed_cycles = 0;
 }
-
-

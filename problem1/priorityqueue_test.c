@@ -1,10 +1,15 @@
-//
-//  priorityqueue_test.c
-//  422 Problem 1
-//
-//  Created by Riley Gratzer on 1/12/16. Modified by Ray Kim on 1/13/16
-//  Copyright © 2016 Riley Gratzer. All rights reserved.
-//
+/***************************************************************************
+* priorityqueue_test.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include <stdio.h>
 #include <time.h>

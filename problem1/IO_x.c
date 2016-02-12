@@ -1,10 +1,15 @@
-//
-//  IO_x.c
-//
-//  Created by Khoa Doan on 2/07/16.
-//  Copyright © 2016 Khoa Doan. All rights reserved.
-//  modified by ray
-//
+/***************************************************************************
+* IO_x.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include "IO_x.h"
 
@@ -34,7 +39,7 @@ unsigned int IO_updateCheckCompletion(IO_STR_p this) {
             return 1;
         }
     }
-    
+
     return 0;
 }
 

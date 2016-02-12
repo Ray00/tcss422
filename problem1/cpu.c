@@ -1,9 +1,15 @@
-/*
- * cpu.c
- *
- *  Created on: Jan 22, 2016
- *      Author: nabilfadili, raykim
- */
+/***************************************************************************
+* cpu.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include "cpu.h"
 #include "discontinuities.h"
@@ -20,7 +26,7 @@ PCB_p GLOBAL_IDLE_process;
 void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOCompletionInterrupt, DISCONT_STR_p IO_device_1, DISCONT_STR_p IO_device_2) {
 
     unsigned int call_device_num;
-    
+
     /* round robin simulation */
     while (1) {
 
@@ -47,41 +53,41 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
 //            PCB_toString(temp_pcb_p, message_buffer_p);
 //            puts(message_buffer_p); //print PCB contents
         }
-        
+
         //if current process is IDLE and processes available in readyQueue, load first process in readyQueue into CPU
         if (this->currentProcess == GLOBAL_IDLE_process && FIFO_size(this->readyQueue) > 0) {
             this->currentProcess = FIFO_dequeue(this->readyQueue);
             PCB_setState(this->currentProcess, running);
         }
-        
+
         /******************************************/
         /* Simulated Fetch, Decode, Execute Cycle */
         /******************************************/
-        
-        
+
+
         //check if current PC matches with any IO calls in the 2 IO traps arrays
         call_device_num = PCB_currPCHasIOCall(this->currentProcess, this->pc);
-        
+
         //FUTURE TODO add Fetch Decode Execute instructions
-        
-        
+
+
         /*****************************************/
         /********* Check Timer Interrupt *********/
         /*****************************************/
-        
+
         if (TIMER_updateCheckCompletion(this->timer)) {
         	int oldPID = this->currentProcess->process_num;
             //Put PC value into sysStack
             STACK_push(this->sysStack, this->pc);
-            
+
             DISCONT_ISR(timerInterrupt, this); //call interrupt service routine
-            
+
             //Put PC value from sysStack into pc
             this->pc = STACK_pop(this->sysStack); /********* IRET *********/
 	    printf("Timer interrupt: PID %u was running, PID %u dispatched\n", oldPID, this->currentProcess->process_num);
-            
+
         }
-        
+
         /*****************************************/
         /**** Check I/O Completion Interrupts ****/
         /*****************************************/
@@ -95,7 +101,7 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             this->pc = STACK_pop(this->sysStack); /********* IRET *********/
 
         }
-        
+
         if (IO_updateCheckCompletion(IO_device_2->interrupting_device)) {
         	printf("I/O completion interrupt: PID %u is running", this->currentProcess->process_num);
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
@@ -103,7 +109,7 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             DISCONT_ISR(IOCompletionInterrupt, this);
             this->pc = STACK_pop(this->sysStack); /********* IRET *********/
         }
-        
+
         /*****************************************/
         /****** Call IO trap service handler *****/
         /*****************************************/
@@ -118,23 +124,23 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             DISCONT_TSR(IO_device_2, this);
             this->pc = STACK_pop(this->sysStack); /********* IRET *********/
         }
-        
+
         /********************************************/
         /* PC increment & process termination check */
         /********************************************/
-        
+
         this->pc += 1; //increment cpu pc
-        
+
         //see if pc has incremented over MAX_PC
         if (this->pc > this->currentProcess->max_pc) {
             this->pc = 0;
             PCB_incrementTermCount(this->currentProcess);
         }
-        
+
         //if process has run full course, move to termination stack
         if (PCB_checkTerminate(this->currentProcess)) {
         	printf("Process terminated: PID %u at %u\n", this->currentProcess->process_num, this->pc);
-            PCB_terminate(this->currentProcess); 
+            PCB_terminate(this->currentProcess);
             //move process to termination queue
             this->currentProcess->addressPC = this->pc;
             FIFO_enqueue(this->terminatedQueue, this->currentProcess);
@@ -144,7 +150,7 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
 	    } else {
 		this->currentProcess = GLOBAL_IDLE_process;
 	    }
-            
+
             this->pc = this->currentProcess->addressPC;
         }
 
@@ -262,7 +268,7 @@ int main() {
     DISCONT_STR_p IOCompletionInterrupt;
     DISCONT_STR_p keyboard_trap_handler;
     DISCONT_STR_p monitor_trap_handler;
-    
+
     message_buffer_p = (char *) malloc(sizeof(char) * 1000);
 
     //create IDLE process
@@ -275,17 +281,17 @@ int main() {
     IOCompletionInterrupt = DISCONT_constructor(1, io_completion);
     DISCONT_STR_p io_device_1 = DISCONT_constructor(2, io_handler_1);
     DISCONT_STR_p io_device_2 = DISCONT_constructor(3, io_handler_2);
-    
+
     IO_STR_p keyboard_trap = IO_constructor();
     IO_STR_p monitor_trap = IO_constructor();
-    
+
     //set place keyboard/monitor trap objects into discont wrappers
     DISCONT_setInterruptingDevice(io_device_1, keyboard_trap);
     DISCONT_setInterruptingDevice(io_device_2, monitor_trap);
 
     //run processes (will run infinitely if there's a PCB with terminate = 0)
     CPU_cycle(cpu, timerInterrupt, IOCompletionInterrupt, io_device_1, io_device_2);
-    
+
     //destroy objects
     DISCONT_destructor(timerInterrupt);
     DISCONT_destructor(IOCompletionInterrupt);

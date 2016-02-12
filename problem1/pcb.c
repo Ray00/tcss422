@@ -1,9 +1,15 @@
-/*
- * pcb.c
- *
- *  Created on: Jan 7, 2016
- *      Author: Kyle Doan, nabilfadili
- */
+/***************************************************************************
+* pcb.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include "pcb.h"
 
@@ -24,7 +30,7 @@
 PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSW, unsigned int addSp, unsigned int randForTerminate) {
     PCB_p result = (PCB_p) malloc(sizeof(PCB));
 
-    
+
     if (result != NULL) {
         result->process_num = pID;
         result->priority = priority;
@@ -45,7 +51,7 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
         result->creation = timeinfo;
 
 
-        
+
         //create I/O trap call arrays
         result->io_1_traps = PCB_create_trap_call_array(MAX_CALLS_FOR_IO);
         result->io_1_array_ptr = result->io_1_traps;
@@ -67,13 +73,13 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
  * return: none
  */
 unsigned int * PCB_create_trap_call_array (unsigned int num_elements_in_array) {
-    
+
     int i = 0;
     int j = 0;
     int temp = 0;
     int check = 0;
     unsigned int * array_ptr;
-    
+
     array_ptr = (unsigned int *) malloc(sizeof(unsigned int) * num_elements_in_array);
 
     temp = rand() % MAX_PC;
@@ -95,7 +101,7 @@ unsigned int * PCB_create_trap_call_array (unsigned int num_elements_in_array) {
         }
     }
 
-    
+
     //Sort Traps calls
     i = 0;
     j = 0;
@@ -109,13 +115,13 @@ unsigned int * PCB_create_trap_call_array (unsigned int num_elements_in_array) {
             }
         }
     }
-    
+
     return array_ptr;
 }
 
-    
-    
-    
+
+
+
 PCB_p PCB_constructorWithEmpty() {
 	PCB_p result = (PCB_p) malloc(sizeof(PCB));
 	result->priority = -1;
@@ -258,18 +264,18 @@ void PCB_incrementTermCount(PCB_p this) {
  *          2               if PC instruction makes call for device 2
  */
 unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
-    
+
     //check if PC matches either values pointed to by IO call array pointers
     if (pc == *(this->io_1_array_ptr)) { ;//bounds checking to stay within io_1_traps
-        
-        
+
+
 	//reset io_array_ptr's once they have reached the last element
     	if (this->io_1_array_ptr == this->io_1_traps + MAX_CALLS_FOR_IO - 1) {
 		this->io_1_array_ptr = this->io_1_traps;
     	} else {
 		(this->io_1_array_ptr)++; //increment pointer to next value
 	}
-	
+
         return 1;
     } else if (pc == *(this->io_2_array_ptr)) { //bounds checking to stay within io_2_traps
 	//reset io_array_ptr's once they have reached the last element

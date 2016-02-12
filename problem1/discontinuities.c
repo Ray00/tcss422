@@ -1,9 +1,15 @@
-/*
- * discontinuities.h
- *
- *  Created on: Feb 6, 2016
- *      Author: ray kim
- */
+/***************************************************************************
+* discontinuities.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include "discontinuities.h"
 
@@ -18,14 +24,14 @@
  * return:  DISCONT_STR_p      this
  */
 DISCONT_STR_p DISCONT_constructor (unsigned int vector, Interrupt_type interrupt) {
-    
+
     DISCONT_STR_p this = (DISCONT_STR_p) malloc(sizeof(DISCONT_STR));
-    
+
     this->vector = vector;
     this->interrupt = interrupt;
     this->interrupting_device = NULL;
     //this->func_ptr = handler_func; //this may not work
-    
+
     return this;
 }
 
@@ -72,17 +78,17 @@ IO_STR_p DISCONT_getInterruptingDevice (DISCONT_STR_p this) {
  * return: none
  */
 void DISCONT_ISR (DISCONT_STR_p this, CPU_p cpu_p) {
-    
+
     //1.) Change the state of the running process to interrupted
     if (cpu_p->currentProcess != GLOBAL_IDLE_process)
     	PCB_setState(cpu_p->currentProcess, interrupted);
 
     //2.) Save the CPU state to the PCB for that process (PC value)
     PCB_setPC(cpu_p->currentProcess, cpu_p->pc);
-    
+
     //3.) Upcall to scheduler (via IVT)
     DISCONT_scheduler(this, cpu_p);
-    
+
     return;
 }
 
@@ -97,21 +103,21 @@ void DISCONT_ISR (DISCONT_STR_p this, CPU_p cpu_p) {
  * return: none
  */
 void DISCONT_TSR (DISCONT_STR_p this, CPU_p cpu_p) {
-    
+
     //1.) Change the state of the running process to interrupted
     PCB_setState(cpu_p->currentProcess, waiting);
-    
+
     //place current process into device waitingQueue
     IO_STR_p interruptingDevice = DISCONT_getInterruptingDevice(this);
     printf(", PID %u put into waiting queue", cpu_p->currentProcess->process_num);
     IO_addProcess(DISCONT_getInterruptingDevice(this), cpu_p->currentProcess);
-    
+
     //pop pc stored in sysStack into PCB of last running process (now in IO waitingQueue)
     PCB_setPC(cpu_p->currentProcess, STACK_pop(cpu_p->sysStack));
-    
+
     //schedule must now grab a process from the readyQueue and make it the actively running process
     DISCONT_scheduler(this, cpu_p);
-    
+
     return;
 }
 
@@ -127,7 +133,7 @@ void DISCONT_TSR (DISCONT_STR_p this, CPU_p cpu_p) {
  * return: none
  */
 //void DISCONT_IVT (DISCONT_STR_p this, CPU_p cpu_p) {
-//    
+//
 //    switch (this->vector) {
 //        case timer:
 //            DISCONT_scheduler(this, cpu_p);
@@ -136,7 +142,7 @@ void DISCONT_TSR (DISCONT_STR_p this, CPU_p cpu_p) {
 //            DISCONT_scheduler(this, cpu_p);
 //            break;
 //        case io_handler_1:
-//            
+//
 //            DISCONT_scheduler(this, cpu_p);
 //            break;
 //        case io_handler_2:
@@ -170,7 +176,7 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
             	//2.) Put the process back into the ready queue (if not idle process)
 	    	FIFO_enqueue(cpu_p->readyQueue, cpu_p->currentProcess);
 	}
-                
+
             //3.) Upcall to dispatcher
             DISCONT_dispatcher(cpu_p);
             //4.) Additional house keeping
@@ -192,7 +198,7 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
 		cpu_p->currentProcess = GLOBAL_IDLE_process;
             }
 
-	    STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));            
+	    STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));
 
             //reset timer
             TIMER_reset(cpu_p->timer);
@@ -202,7 +208,7 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
 
             break;
     }
-    
+
 
     //Return - Chance to do more before returning but nothing yet
     return;
@@ -216,17 +222,17 @@ void DISCONT_dispatcher(CPU_p cpu_p) {
     }
     PCB_p last_process_p = cpu_p->currentProcess;
     char * message_buffer_p = (char *) malloc(sizeof(char) * 1000);
-    
+
     //1.) Save the state of the current process into its PCB (here we mean the PC value)
     /*NOT SURE WHY WE NEED TO DO THIS AGAIN?*/
-    
+
     //every fourth context switch
     if (GLOBAL_NEW_PROC_ID % 4 == 0) {
         PCB_toString(last_process_p, message_buffer_p);
         printf("Interrupted Process: %s", message_buffer_p); //print the contents of the running process
         PCB_toString(last_process_p, message_buffer_p);
         printf("Switching to: %s\n", message_buffer_p); //print contents of the ready queue head PCB
-        
+
     }
     //Put PC value from sysStack into last running process that has just been placed into the readyqueue in the scheduler function
     PCB_setPC(cpu_p->currentProcess, STACK_pop(cpu_p->sysStack));
@@ -239,7 +245,7 @@ void DISCONT_dispatcher(CPU_p cpu_p) {
     } else {
         cpu_p->currentProcess = GLOBAL_IDLE_process;
     }
-    
+
     //4.) Copy its PC value (and SW if you implement it) to the SysStack location to replace the PC of the interrupted process
     STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));
 
@@ -252,7 +258,7 @@ void DISCONT_dispatcher(CPU_p cpu_p) {
 //        FIFO_toString(cpu_p->readyQueue, message_buffer_p);
 //        printf("Ready Queue: %s\n\n", message_buffer_p);
     }
-    
+
     free(message_buffer_p);
     //5.) Return
     return;
