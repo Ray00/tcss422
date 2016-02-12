@@ -14,6 +14,7 @@
 #include <time.h>
 
 
+
 //#define NUMREGS 16
 #define MAX_PC 2345
 #define MAX_CALLS_FOR_IO 4
@@ -41,8 +42,8 @@ typedef struct pcb_type {
 typedef PCB *PCB_p;
 
 /* Prototypes */
-PCB_p PCB_constructor(unsigned int, unsigned int, enum state_type, unsigned int, unsigned int, unsigned int);
-void PCB_create_trap_call_array (unsigned int *, unsigned int *);
+PCB_p PCB_constructor(unsigned int, unsigned int, enum state_type, unsigned int, unsigned int, unsigned int, unsigned int);
+unsigned int * PCB_create_trap_call_array (unsigned int);
 PCB_p PCB_constructorWithEmpty(void);
 void PCB_destructor(PCB_p);
 void PCB_setProcessNumber(PCB_p, unsigned int);
@@ -55,6 +56,6 @@ void PCB_setState(PCB_p, enum state_type);
 void PCB_terminate(PCB_p);
 void PCB_incrementTermCount(PCB_p);
 unsigned int PCB_currPCHasIOCall(PCB_p, unsigned int);
-char * PCB_toString(PCB_p);
+void PCB_toString(PCB_p, char *);
 
 #endif /* PCB_H_ */

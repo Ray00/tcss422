@@ -9,6 +9,7 @@
 #include "discontinuities.h"
 
 unsigned int GLOBAL_NEW_PROC_ID = 0;
+char * message_buffer_p;
 
 /*
  * Function:  Main
@@ -17,6 +18,8 @@ unsigned int GLOBAL_NEW_PROC_ID = 0;
  */
 void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOCompletionInterrupt, DISCONT_STR_p IO_device_1, DISCONT_STR_p IO_device_2) {
 
+    unsigned int call_device_num;
+    
     /* round robin simulation */
     while (1) {
 
@@ -26,6 +29,13 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         //create up to 5 new processes
         if (GLOBAL_NEW_PROC_ID < 30) {
             createNewProcesses(this);
+        } else {
+            PCB_toString(this->currentProcess, message_buffer_p);
+            printf("PC: %d\n", this->pc);
+            printf("IO 1 next call: %d\n", this->currentProcess->io_1_array_ptr[0]);
+            printf("IO 2 next call: %d\n", this->currentProcess->io_2_array_ptr[0]);
+            puts(message_buffer_p); //print PCB contents
+
         }
         
         //add newly created processes in this->createdQueue to this->readyQueue
@@ -35,8 +45,11 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             FIFO_enqueue(this->readyQueue, temp_pcb_p);
 
             printf("Process ID: %u Enqueued\n", temp_pcb_p->process_num); //print message that process has been enqueued
-
-            puts(PCB_toString(temp_pcb_p)); //print PCB contents
+            
+            PCB_toString(temp_pcb_p, message_buffer_p);
+            
+            puts(message_buffer_p); //print PCB contents
+            
 
         }
         
@@ -45,13 +58,14 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             this->currentProcess = FIFO_dequeue(this->readyQueue);
             PCB_setState(this->currentProcess, running);
         }
-
+        
         /*****************************************/
         /* Simulated Fetch, Decode, Execute Cycle /
         /*****************************************/
-
+        
+        
         //check if current PC matches with any IO calls in the 2 IO traps arrays
-        unsigned int call_device_num = PCB_currPCHasIOCall(this->currentProcess, this->pc);
+        call_device_num = PCB_currPCHasIOCall(this->currentProcess, this->pc);
         
         //FUTURE TODO add Fetch Decode Execute instructions
         
@@ -132,15 +146,15 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
 
 
 void createNewProcesses(CPU_p this) {
-    int random_num_range_0_to_5 = rand() % 6; //create a random number of new processes, between 0 and 5
-    
+    int random_num_range_0_to_5 = (rand() % 6) + 1; //create a random number of new processes, between 0 and 5
+//printf("%d\n", random_num_range_0_to_5);
     //place random num processes into cpu_p->createdQueue
     for (int i = 1; i <= random_num_range_0_to_5; i++) {
         
         GLOBAL_NEW_PROC_ID += 1;
         
         //PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp)
-        FIFO_enqueue(this->createdQueue, PCB_constructor(GLOBAL_NEW_PROC_ID, 1, new, 0, 0, 0));
+        FIFO_enqueue(this->createdQueue, PCB_constructor(GLOBAL_NEW_PROC_ID, 1, new, 0, 0, 0, rand()));
     }
 }
 
@@ -228,6 +242,7 @@ char* CPU_toString(CPU_p this) {
 
 
 int main() {
+    srand(time(NULL));
     
     //create interrupt objects
     CPU_p cpu = CPU_constructor();
@@ -236,6 +251,7 @@ int main() {
     DISCONT_STR_p keyboard_trap_handler;
     DISCONT_STR_p monitor_trap_handler;
     
+    message_buffer_p = (char *) malloc(sizeof(char) * 1000);
     timerInterrupt = DISCONT_constructor(0, timer);
     IOCompletionInterrupt = DISCONT_constructor(1, io_completion);
     DISCONT_STR_p io_device_1 = DISCONT_constructor(2, io_handler_1);

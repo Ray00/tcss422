@@ -197,14 +197,17 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
 void DISCONT_dispatcher(CPU_p cpu_p) {
     PCB_p next_process_p = FIFO_dequeue(cpu_p->readyQueue);
     PCB_p last_process_p = cpu_p->currentProcess;
+    char * message_buffer_p = (char *) malloc(sizeof(char) * 1000);
     
     //1.) Save the state of the current process into its PCB (here we mean the PC value)
     /*NOT SURE WHY WE NEED TO DO THIS AGAIN?*/
     
     //every fourth context switch
     if (GLOBAL_NEW_PROC_ID % 4 == 0) {
-        printf("Interrupted Process: %s", PCB_toString(last_process_p)); //print the contents of the running process
-        printf("Switching to: %s\n", PCB_toString(next_process_p)); //print contents of the ready queue head PCB
+        PCB_toString(last_process_p, message_buffer_p);
+        printf("Interrupted Process: %s", message_buffer_p); //print the contents of the running process
+        PCB_toString(last_process_p, message_buffer_p);
+        printf("Switching to: %s\n", message_buffer_p); //print contents of the ready queue head PCB
         
     }
     //Put PC value from sysStack into last running process that has just been placed into the readyqueue in the scheduler function
@@ -218,11 +221,14 @@ void DISCONT_dispatcher(CPU_p cpu_p) {
     
     //after context switch
     if (GLOBAL_NEW_PROC_ID % 4 == 0) {
-        printf("Last Process: %s", PCB_toString(last_process_p)); //print the contents of the last process
-        printf("Current Process: %s", PCB_toString(next_process_p)); //print contents of current process
+        PCB_toString(last_process_p, message_buffer_p);
+        printf("Last Process: %s", message_buffer_p); //print the contents of the last process
+        PCB_toString(next_process_p, message_buffer_p);
+        printf("Current Process: %s", message_buffer_p); //print contents of current process
         printf("Ready Queue: %s\n\n", FIFO_toString(cpu_p->readyQueue));
     }
     
+    free(message_buffer_p);
     //5.) Return
     return;
 }

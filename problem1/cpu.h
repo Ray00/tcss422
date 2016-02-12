@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #include "pcb.h"
 #include "fifoqueue.h"
 #include "timer.h"

@@ -7,6 +7,7 @@
 
 #include "pcb.h"
 
+
 /*
  * Function:  PCB_constructor
  * --------------------
@@ -20,12 +21,11 @@
  *			 addSp
  *  returns: PCB_p pointer to the PCB object in the heap
  */
-PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSW, unsigned int addSp) {
+PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSW, unsigned int addSp, unsigned int randForTerminate) {
     PCB_p result = (PCB_p) malloc(sizeof(PCB));
+
     
-    srand(time(NULL));
-    
-    if (result != (PCB_p) NULL) {
+    if (result != NULL) {
         result->process_num = pID;
         result->priority = priority;
         result->state = s;
@@ -33,7 +33,7 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
         result->addressSW = addSW;
         result->addressSpace = addSp;
         result->max_pc = MAX_PC;
-        result->terminate = rand() % 10; //generate random terminate number
+        result->terminate = randForTerminate % 6; //generate random terminate number
         result->term_count = 0;
 
         //Get the creation time
@@ -44,9 +44,13 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
 
         result->creation = timeinfo;
 
+
+        
         //create I/O trap call arrays
-        PCB_create_trap_call_array(result->io_1_traps, result->io_1_array_ptr);
-        PCB_create_trap_call_array(result->io_2_traps, result->io_2_array_ptr);
+        result->io_1_traps = PCB_create_trap_call_array(MAX_CALLS_FOR_IO);
+        result->io_1_array_ptr = result->io_1_traps;
+        result->io_2_traps = PCB_create_trap_call_array(MAX_CALLS_FOR_IO);
+        result->io_2_array_ptr = result->io_2_traps;
 
     }
 
@@ -59,39 +63,38 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
  * ------------------------
  * creates an array of instructions (randomly) at which I/O device traps are called
  *
- * params:  unsigned int * trap_call_array pointer to trap call array
- *          unsigned int * trap call_array_ptr current pointer for trap call array
+ * params:  unsigned int number of elements in array
  * return: none
  */
-void PCB_create_trap_call_array (unsigned int * trap_call_array, unsigned int * trap_call_array_ptr) {
+unsigned int * PCB_create_trap_call_array (unsigned int num_elements_in_array) {
     
     int i = 0;
     int j = 0;
     int temp = 0;
     int check = 0;
+    unsigned int * array_ptr;
     
-    trap_call_array = (unsigned int *) malloc(sizeof(unsigned int) * MAX_CALLS_FOR_IO);
-    trap_call_array_ptr = trap_call_array;
-    
+    array_ptr = (unsigned int *) malloc(sizeof(unsigned int) * num_elements_in_array);
+
     temp = rand() % MAX_PC;
-    trap_call_array[0] = temp;
+    array_ptr[0] = temp;
     //printf("%d\n", temp);
     for (i = 1; i < 4; i++) {
         temp = rand() % MAX_PC;
         //printf("%d\n", temp);
         check = 0;
         for (j = 0; j < i; j++) {
-            if (temp == trap_call_array[j]) {
+            if (temp == array_ptr[j]) {
                 check = 1;
             }
         }
         if (check == 0) {
-            trap_call_array[i] = temp;
+            array_ptr[i] = temp;
         } else {
             i--;
         }
     }
-    
+
     
     //Sort Traps calls
     i = 0;
@@ -99,15 +102,15 @@ void PCB_create_trap_call_array (unsigned int * trap_call_array, unsigned int * 
     temp = 0;
     for (i = 0; i < 4; i++) {
         for (j = i + 1; j < 4; j++) {
-            if (trap_call_array[i] > trap_call_array[j]) {
-                temp =  trap_call_array[i];
-                trap_call_array[i] = trap_call_array[j];
-                trap_call_array[j] = temp;
+            if (array_ptr[i] > array_ptr[j]) {
+                temp =  array_ptr[i];
+                array_ptr[i] = array_ptr[j];
+                array_ptr[j] = temp;
             }
         }
     }
     
-    
+    return array_ptr;
 }
 
     
@@ -256,9 +259,11 @@ void PCB_incrementTermCount(PCB_p this) {
  *          2               if PC instruction makes call for device 2
  */
 unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
+    
     //check if PC matches either values pointed to by IO call array pointers
-    if (pc == *(this->io_1_array_ptr) && (this->io_1_array_ptr < this->io_1_traps + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_1_traps
+    if (pc == *(this->io_1_array_ptr) && (this->io_1_array_ptr < this->io_1_traps + MAX_CALLS_FOR_IO)) { ;//bounds checking to stay within io_1_traps
         (this->io_1_array_ptr)++; //increment pointer to next value
+        
         return 1;
     } else if (pc == *(this->io_2_array_ptr) && (this->io_2_array_ptr < this->io_2_traps + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_2_traps
         (this->io_2_array_ptr)++; //increment pointer to next value
@@ -276,12 +281,13 @@ unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
  * testing/debugging purposes.
  *
  * params:	PCB_p pointer to the PCB object in the heap.
+ *          char * result the buffer the output message is written to
  */
- char* PCB_toString(PCB_p me) {
+ void PCB_toString(PCB_p this, char * result) {
      char state_description[16];
      //find correct string to print for state enum
      //new, ready, running, interrupted, waiting, halted, idle
-     switch (me->state) {
+     switch (this->state) {
          case 0:
              strcpy(state_description, "new");
              break;
@@ -305,8 +311,5 @@ unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
              break;
      }
 
-     char * result = (char *) malloc(sizeof(char) * 1000);
-     sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %s, PC: 0x%04X\n",
-             me->process_num, me->priority, state_description, me->addressPC);
-     return result;
+     sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %s, PC: 0x%04X\nCycles before termination: %d, Current cycle number: %d\n\n", this->process_num, this->priority, state_description, this->addressPC, this->terminate, this->term_count);
  }
