@@ -61,7 +61,7 @@ char * PriorityQueue_toString(PriorityQueue_p this) {
     for (i = 0; i < MAX_PRIORITY; i++) {
         sprintf(queue_num, "Q%i: ", i);
         strcat(result, queue_num);
-        temp = FIFO_toString(this->queueArray[i]);
+        temp = FIFO_toString(this->queueArray[i], temp);
         strcat(result, temp);
         strcat(result, "\n");
     }
