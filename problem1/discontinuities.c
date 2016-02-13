@@ -211,6 +211,9 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
 
 void DISCONT_dispatcher(CPU_p cpu_p) {
     PCB_p next_process_p = FIFO_dequeue(cpu_p->readyQueue);
+    if (next_process_p == NULL) {
+	next_process_p = GLOBAL_IDLE_process;
+    }
     PCB_p last_process_p = cpu_p->currentProcess;
     char * message_buffer_p = (char *) malloc(sizeof(char) * 1000);
     

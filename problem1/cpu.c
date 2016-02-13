@@ -77,11 +77,9 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             DISCONT_ISR(timerInterrupt, this); //call interrupt service routine
             
             //Put PC value from sysStack into pc
-            if (this->currentProcess != NULL)
-                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
-            else
-                STACK_pop(this->sysStack);
-            printf("Timer interrupt: PID %u was running, PID %u dispatched\n", oldPID, this->currentProcess->process_num);
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
+	    printf("Timer interrupt: PID %u was running, PID %u dispatched\n", oldPID, this->currentProcess->process_num);
+            
         }
         
         /*****************************************/
