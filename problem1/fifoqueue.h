@@ -1,9 +1,15 @@
-/*
- * fifoqueue.h
- *
- *  Created on: Jan 7, 2016
- *      Author: Ray Kim
- */
+/***************************************************************************
+* fifoqueue.h
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #ifndef FIFO_QUEUE_H
 #define FIFO_QUEUE_H
@@ -16,7 +22,7 @@
 typedef struct node_str {
 	struct node_str * next_node;
 	PCB_p pcb_addr;
-	
+
 } NODE_STR;
 
 typedef NODE_STR * NODE_STR_p;
@@ -29,7 +35,7 @@ typedef struct pcb_queue_str {
 	NODE_STR_p tail_node;
 	unsigned int num_nodes;
     NODE_STR_p free_node;
-	
+
 } PCB_QUEUE_STR;
 
 typedef PCB_QUEUE_STR * PCB_QUEUE_STR_p;
@@ -46,4 +52,4 @@ unsigned int FIFO_size(PCB_QUEUE_STR_p);
 
 char * FIFO_toString(PCB_QUEUE_STR_p, char *);
 
-#endif 
+#endif

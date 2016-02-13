@@ -1,10 +1,16 @@
-//
-//  timer.h
-//
-//  Created by Khoa Doan on 2/07/16.
-//  Copyright © 2016 Khoa Doan. All rights reserved.
-//  modified by ray
-//
+/***************************************************************************
+* timer.h
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
+
 #ifndef TIMER_H_
 #define TIMER_H_
 

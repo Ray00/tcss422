@@ -1,9 +1,15 @@
-/*
- * pcb_test.h
- *
- *  Created on: Jan 9, 2016
- *      Author: Kyle Doan, nabilfadili
- */
+/***************************************************************************
+* pcb.h
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #ifndef PCB_H
 #define PCB_H

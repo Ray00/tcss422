@@ -1,3 +1,16 @@
+/***************************************************************************
+* priorityqueue.h
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
+
 #ifndef PriorityQueue_H
 #define PriorityQueue_H
 

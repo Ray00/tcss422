@@ -1,10 +1,15 @@
-//
-//  stack.c
-//
-//  Created by Khoa Doan on 2/07/16.
-//  Copyright © 2016 Khoa Doan. All rights reserved.
-//  modified by ray
-//
+/***************************************************************************
+* stack.c
+*
+* Programming Team:
+* Ray Kim
+* Kyle Doan
+* Nabil Fadili
+* Riley Gratzer
+*
+* Date: 2/12/16
+*
+****************************************************************************/
 
 #include "stack.h"
 
@@ -15,7 +20,7 @@ STACK_STR_p STACK_constructor(unsigned int stack_size) {
         this->pointer_index = 0;
         this->array_size = stack_size;
     }
-    
+
     return this;
 }
 
@@ -38,7 +43,7 @@ void STACK_push(STACK_STR_p this, unsigned int data) {
 
 unsigned int STACK_pop(STACK_STR_p this) {
     this->pointer_index--;
-    
+
     if (this->pointer_index > this->array_size) { //in case pointer_index was decremented below 0 and is now 0xFFFFFFFF
         puts("Error: cannot pop more elements out of stack, stack is empty");
         exit(1);
