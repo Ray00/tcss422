@@ -133,8 +133,8 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         
         //if process has run full course, move to termination stack
         if (PCB_checkTerminate(this->currentProcess)) {
-        	printf("Process terminated: PID %u at %u\n", this->currentProcess->process_num, this->pc);
-            PCB_terminate(this->currentProcess); 
+            PCB_terminate(this->currentProcess);
+        	printf("Process terminated: PID %u at %ld\n", this->currentProcess->process_num, (long)this->currentProcess->termination);
             //move process to termination queue
             this->currentProcess->addressPC = this->pc;
             FIFO_enqueue(this->terminatedQueue, this->currentProcess);
@@ -165,7 +165,7 @@ void createNewProcesses(CPU_p this) {
         GLOBAL_NEW_PROC_ID += 1;
         //PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp)
         newPCB = PCB_constructor(GLOBAL_NEW_PROC_ID, 1, new, 0, 0, 0, rand());
-        printf("Process created: PID %d at %u\n", newPCB->process_num, this->pc);
+        printf("Process created: PID %d at %ld\n", newPCB->process_num, (long)this->currentProcess->creation);
         FIFO_enqueue(this->createdQueue, newPCB);
     }
 }

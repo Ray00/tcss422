@@ -37,14 +37,7 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
         result->term_count = 0;
 
         //Get the creation time
-        time_t rawtime;
-        struct tm * timeinfo;
-        time ( &rawtime );
-        timeinfo = localtime ( &rawtime );
-
-        result->creation = timeinfo;
-
-
+        result->creation = PCB_getTimestamp();
         
         //create I/O trap call arrays
         result->io_1_traps = PCB_create_trap_call_array(MAX_CALLS_FOR_IO);
@@ -226,13 +219,9 @@ unsigned int PCB_checkTerminate(PCB_p this) {
 void PCB_terminate(PCB_p this) {
 
     //Set termination time
-    time_t rawtime;
-    struct tm * timeinfo;
-    time ( &rawtime );
-    timeinfo = localtime ( &rawtime );
-
-    this->termination = timeinfo;
+    this->termination = PCB_getTimestamp();
     this->state = halted;
+    
 }
 
 
@@ -240,7 +229,23 @@ void PCB_incrementTermCount(PCB_p this) {
   this->term_count++;
 }
 
-
+/*
+ * Function:  PCB_getTimestamp
+ * --------------------
+ * Returns unix time stamp
+ *
+ *
+ * params:	none
+ * return:  struct time_t * struct which contains timestamp data type
+ */
+struct tm * PCB_getTimestamp(void) {
+    time_t rawtime;
+    struct tm * timeinfo;
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+    
+    return timeinfo;
+}
 
 
 /*

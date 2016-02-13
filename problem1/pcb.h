@@ -55,6 +55,7 @@ int PCB_getPC(PCB_p);
 void PCB_setState(PCB_p, enum state_type);
 void PCB_terminate(PCB_p);
 void PCB_incrementTermCount(PCB_p);
+struct tm * PCB_getTimestamp(void);
 unsigned int PCB_currPCHasIOCall(PCB_p, unsigned int);
 void PCB_toString(PCB_p, char *);
 
