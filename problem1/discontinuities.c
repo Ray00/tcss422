@@ -74,7 +74,8 @@ IO_STR_p DISCONT_getInterruptingDevice (DISCONT_STR_p this) {
 void DISCONT_ISR (DISCONT_STR_p this, CPU_p cpu_p) {
     
     //1.) Change the state of the running process to interrupted
-    PCB_setState(cpu_p->currentProcess, interrupted);
+    if (cpu_p->currentProcess != GLOBAL_IDLE_process)
+    	PCB_setState(cpu_p->currentProcess, interrupted);
 
     //2.) Save the CPU state to the PCB for that process (PC value)
     PCB_setPC(cpu_p->currentProcess, cpu_p->pc);
@@ -163,11 +164,13 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
     PCB_p unblocked_process;
     switch (this->vector) {
         case timer:
-            //1.) Change its state from interrupted to ready
-            cpu_p->currentProcess->state = ready;
-            //2.) Put the process back into the ready queue (if not idle process)
-            if (cpu_p->currentProcess != NULL)
-                FIFO_enqueue(cpu_p->readyQueue, cpu_p->currentProcess);
+            if (cpu_p->currentProcess != NULL && cpu_p->currentProcess->priority < 30) {
+		//1.) Change its state from interrupted to ready
+            	cpu_p->currentProcess->state = ready;
+            	//2.) Put the process back into the ready queue (if not idle process)
+	    	FIFO_enqueue(cpu_p->readyQueue, cpu_p->currentProcess);
+	}
+                
             //3.) Upcall to dispatcher
             DISCONT_dispatcher(cpu_p);
             //4.) Additional house keeping
@@ -179,20 +182,24 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
             printf(", PID %u put in ready queue\n", unblocked_process->process_num);
             FIFO_enqueue(cpu_p->readyQueue, unblocked_process);
             break;
-        default: //io trap handler
+        default: //io call handler
             //grab new process to run
             cpu_p->currentProcess = FIFO_dequeue(cpu_p->readyQueue);
             //push pc of newly dequeued readyQueue process int sysStack
-            printf(", PID %u dispatched\n", cpu_p->currentProcess->process_num);
             if (cpu_p->currentProcess != NULL) {
                 PCB_setState(cpu_p->currentProcess, running);
-                STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));
             } else {
-                STACK_push(cpu_p->sysStack, 0);
+		cpu_p->currentProcess = GLOBAL_IDLE_process;
             }
-            
+
+	    STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));            
+
             //reset timer
             TIMER_reset(cpu_p->timer);
+
+	    //print dispatched information
+	    printf(", PID %u dispatched\n", cpu_p->currentProcess->process_num);
+
             break;
     }
     
@@ -226,20 +233,21 @@ void DISCONT_dispatcher(CPU_p cpu_p) {
     if (cpu_p->currentProcess != NULL) { //if currentProcess is null(IDLE)
         //3.) Change its state to running
         PCB_setState(cpu_p->currentProcess, running);
-        //4.) Copy its PC value (and SW if you implement it) to the SysStack location to replace the PC of the interrupted process
-        STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));
     } else {
-        STACK_push(cpu_p->sysStack, 0);
+        cpu_p->currentProcess = GLOBAL_IDLE_process;
     }
     
+    //4.) Copy its PC value (and SW if you implement it) to the SysStack location to replace the PC of the interrupted process
+    STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));
+
     //after context switch
     if (GLOBAL_NEW_PROC_ID % 4 == 0) {
         PCB_toString(last_process_p, message_buffer_p);
         printf("Last Process: %s", message_buffer_p); //print the contents of the last process
         PCB_toString(next_process_p, message_buffer_p);
         printf("Current Process: %s", message_buffer_p); //print contents of current process
-        FIFO_toString(cpu_p->readyQueue, message_buffer_p);
-        printf("Ready Queue: %s\n\n", message_buffer_p);
+//        FIFO_toString(cpu_p->readyQueue, message_buffer_p);
+//        printf("Ready Queue: %s\n\n", message_buffer_p);
     }
     
     free(message_buffer_p);

@@ -213,7 +213,7 @@ void PCB_setState (PCB_p self, enum state_type s) {
  *          1               if process has terminated and needs to be removed
  */
 unsigned int PCB_checkTerminate(PCB_p this) {
-    if (this->term_count == 0) {
+    if (this->terminate == 0) {
         return 0;
     } else if (this->terminate == this->term_count) {
         return 1;
@@ -224,7 +224,6 @@ unsigned int PCB_checkTerminate(PCB_p this) {
 
 
 void PCB_terminate(PCB_p this) {
-    this->terminate = 1;
 
     //Set termination time
     time_t rawtime;
@@ -261,14 +260,29 @@ void PCB_incrementTermCount(PCB_p this) {
 unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
     
     //check if PC matches either values pointed to by IO call array pointers
-    if (pc == *(this->io_1_array_ptr) && (this->io_1_array_ptr < this->io_1_traps + MAX_CALLS_FOR_IO)) { ;//bounds checking to stay within io_1_traps
-        (this->io_1_array_ptr)++; //increment pointer to next value
+    if (pc == *(this->io_1_array_ptr)) { ;//bounds checking to stay within io_1_traps
         
+        
+	//reset io_array_ptr's once they have reached the last element
+    	if (this->io_1_array_ptr == this->io_1_traps + MAX_CALLS_FOR_IO - 1) {
+		this->io_1_array_ptr = this->io_1_traps;
+    	} else {
+		(this->io_1_array_ptr)++; //increment pointer to next value
+	}
+	
         return 1;
-    } else if (pc == *(this->io_2_array_ptr) && (this->io_2_array_ptr < this->io_2_traps + MAX_CALLS_FOR_IO)) { //bounds checking to stay within io_2_traps
-        (this->io_2_array_ptr)++; //increment pointer to next value
+    } else if (pc == *(this->io_2_array_ptr)) { //bounds checking to stay within io_2_traps
+	//reset io_array_ptr's once they have reached the last element
+    	if (this->io_2_array_ptr == this->io_2_traps + MAX_CALLS_FOR_IO - 1) {
+		this->io_2_array_ptr = this->io_2_traps;
+    	} else {
+		(this->io_2_array_ptr)++; //increment pointer to next value
+	}
+
         return 2;
     }
+
+
 
     return 0;
 }

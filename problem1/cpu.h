@@ -36,6 +36,7 @@ typedef CPU * CPU_p;
 extern int GLOBAL_TIMER_INTERRUPT;
 extern int GLOBAL_IO_COMPLETION_INTERRUPT;
 extern unsigned int GLOBAL_NEW_PROC_ID;
+extern PCB_p GLOBAL_IDLE_process;
 
 /*** function pointer signature used for all handler functions ***/
 //typedef void (*handler_fp)(PCB_P);

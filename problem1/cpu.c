@@ -10,6 +10,7 @@
 
 unsigned int GLOBAL_NEW_PROC_ID = 0;
 char * message_buffer_p;
+PCB_p GLOBAL_IDLE_process;
 
 /*
  * Function:  Main
@@ -48,7 +49,7 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         }
         
         //if current process is IDLE and processes available in readyQueue, load first process in readyQueue into CPU
-        if (this->currentProcess == NULL && FIFO_size(this->readyQueue) > 0) {
+        if (this->currentProcess == GLOBAL_IDLE_process && FIFO_size(this->readyQueue) > 0) {
             this->currentProcess = FIFO_dequeue(this->readyQueue);
             PCB_setState(this->currentProcess, running);
         }
@@ -93,10 +94,7 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
             DISCONT_setInterruptingDevice(IOCompletionInterrupt, IO_device_1->interrupting_device);
             DISCONT_ISR(IOCompletionInterrupt, this); //call ISR
-            if (this->currentProcess != NULL)
-                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
-            else
-                STACK_pop(this->sysStack);
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
 
         }
         
@@ -105,10 +103,7 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
             DISCONT_setInterruptingDevice(IOCompletionInterrupt, IO_device_2->interrupting_device);
             DISCONT_ISR(IOCompletionInterrupt, this);
-            if (this->currentProcess != NULL)
-                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
-            else
-                STACK_pop(this->sysStack);
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
         }
         
         /*****************************************/
@@ -118,18 +113,12 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         	printf("I/O trap request: I/O device 1");
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
             DISCONT_TSR(IO_device_1, this);
-            if (this->currentProcess != NULL)
-                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
-            else
-                STACK_pop(this->sysStack);
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
         } else if (call_device_num == 2) {
         	printf("I/O trap request: I/O device 2");
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
             DISCONT_TSR(IO_device_2, this);
-            if (this->currentProcess != NULL)
-                this->pc = STACK_pop(this->sysStack); /********* IRET *********/
-            else
-                STACK_pop(this->sysStack);
+            this->pc = STACK_pop(this->sysStack); /********* IRET *********/
         }
         
         /********************************************/
@@ -147,14 +136,17 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         //if process has run full course, move to termination stack
         if (PCB_checkTerminate(this->currentProcess)) {
         	printf("Process terminated: PID %u at %u\n", this->currentProcess->process_num, this->pc);
-            PCB_terminate(this->currentProcess);
+            PCB_terminate(this->currentProcess); 
             //move process to termination queue
             this->currentProcess->addressPC = this->pc;
             FIFO_enqueue(this->terminatedQueue, this->currentProcess);
             //bring in new process from readyqueue
-            this->currentProcess = FIFO_dequeue(this->readyQueue);
-            if (this->currentProcess == NULL)
-                return;
+	    if (FIFO_size(this->readyQueue) > 0) {
+		this->currentProcess = FIFO_dequeue(this->readyQueue);
+	    } else {
+		this->currentProcess = GLOBAL_IDLE_process;
+	    }
+            
             this->pc = this->currentProcess->addressPC;
         }
 
@@ -167,10 +159,11 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
 
 void createNewProcesses(CPU_p this) {
     int random_num_range_0_to_5 = (rand() % 6) + 1; //create a random number of new processes, between 0 and 5
+    int i;
     //printf("%d\n", random_num_range_0_to_5);
     //place random num processes into cpu_p->createdQueue
     PCB_p newPCB = NULL;
-    for (int i = 1; i <= random_num_range_0_to_5; i++) {
+    for (i = 1; i <= random_num_range_0_to_5; i++) {
         GLOBAL_NEW_PROC_ID += 1;
         //PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp)
         newPCB = PCB_constructor(GLOBAL_NEW_PROC_ID, 1, new, 0, 0, 0, rand());
@@ -273,6 +266,13 @@ int main() {
     DISCONT_STR_p monitor_trap_handler;
     
     message_buffer_p = (char *) malloc(sizeof(char) * 1000);
+
+    //create IDLE process
+    GLOBAL_IDLE_process = PCB_constructor(999, 999, idle, 0, 0, 0, 0);
+    GLOBAL_IDLE_process->io_1_traps[0] = 0xFFFFFFFF;
+    GLOBAL_IDLE_process->io_2_traps[0] = 0xFFFFFFFF;
+    cpu->currentProcess = GLOBAL_IDLE_process; //set first process as idle
+
     timerInterrupt = DISCONT_constructor(0, timer);
     IOCompletionInterrupt = DISCONT_constructor(1, io_completion);
     DISCONT_STR_p io_device_1 = DISCONT_constructor(2, io_handler_1);
