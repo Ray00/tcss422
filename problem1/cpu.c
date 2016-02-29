@@ -14,7 +14,21 @@
 #include "cpu.h"
 #include "discontinuities.h"
 
-unsigned int GLOBAL_NEW_PROC_ID = 0;
+/*Sets max amount of IO process to be created.
+ *PID RANGE: 0 - 49*/
+unsigned int GLOBAL_NEW_IO_PROC_ID = 0;
+unsigned int GLOBAL_NEW_IO_PROC_ID_MAX = 49;
+
+/*Sets max amount of cpu intensive 'dummy' process to be created.
+ *PID RANGE: 50 - 74*/
+unsigned int GLOBAL_NEW_INTENSIVE_PROC_ID = 50;
+unsigned int GLOBAL_NEW_INTENSIVE_PROC_ID_MAX = 74;
+
+/*Sets max amount of cpu intensive realistic process to be created.
+ *PID RANGE: 75 - 84*/
+unsigned int GLOBAL_NEW_REALISTIC_PROC_ID = 75;
+unsigned int GLOBAL_NEW_REALISTIC_PROC_ID_MAX = 84;
+
 char * message_buffer_p;
 PCB_p GLOBAL_IDLE_process;
 
@@ -29,21 +43,22 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
 
     /* round robin simulation */
     while (1) {
-
         /*****************************************/
         /********* Create new processes **********/
         /*****************************************/
-        //create up to 5 new processes
-        if (GLOBAL_NEW_PROC_ID < 30) {
-            createNewProcesses(this);
-        } else {
-//            PCB_toString(this->currentProcess, message_buffer_p);
-//            printf("PC: %d\n", this->pc);
-//            printf("IO 1 next call: %d\n", this->currentProcess->io_1_array_ptr[0]);
-//            printf("IO 2 next call: %d\n", this->currentProcess->io_2_array_ptr[0]);
-//            puts(message_buffer_p); //print PCB contents
-
+        //create up to 5 new IO processes
+        if (GLOBAL_NEW_IO_PROC_ID <= GLOBAL_NEW_IO_PROC_ID_MAX) {
+            createNewIOProcesses(this);
         }
+        //create up to 5 new INTENSIVE processes
+        if (GLOBAL_NEW_INTENSIVE_PROC_ID <= GLOBAL_NEW_INTENSIVE_PROC_ID_MAX) {
+            createNewIntensiveProcesses(this);
+        }
+        //create up to 5 new PRODUCER/CONSUMER processes
+        if (GLOBAL_NEW_REALISTIC_PROC_ID <= GLOBAL_NEW_REALISTIC_PROC_ID_MAX) {
+            //createNewRealisticProcesses(this);
+        }
+
         //add newly created processes in this->createdQueue to this->readyQueue
         while (FIFO_size(this->createdQueue) != 0) {
             PCB_p temp_pcb_p = FIFO_dequeue(this->createdQueue);
@@ -63,13 +78,16 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         /******************************************/
         /* Simulated Fetch, Decode, Execute Cycle */
         /******************************************/
-
-
         //check if current PC matches with any IO calls in the 2 IO traps arrays
-        call_device_num = PCB_currPCHasIOCall(this->currentProcess, this->pc);
-
+        //NOTE: New for final project!
+        //If the io_arrays are NULL then this is a compute intensive process with no IO.
+        if (this->currentProcess->io_1_array_ptr != NULL && this->currentProcess->io_1_array_ptr != NULL) {
+        	call_device_num = PCB_currPCHasIOCall(this->currentProcess, this->pc);
+        }
+        else {
+        	call_device_num = -1;
+        }
         //FUTURE TODO add Fetch Decode Execute instructions
-
 
         /*****************************************/
         /********* Check Timer Interrupt *********/
@@ -113,6 +131,8 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         /*****************************************/
         /****** Call IO trap service handler *****/
         /*****************************************/
+        //NOTE: New in Final Project
+        //Will only enter these blocks if a call device number was generated
         if (call_device_num == 1) {
         	printf("I/O trap request: I/O device 1");
             STACK_push(this->sysStack, this->pc); //Put PC value into sysStack
@@ -163,19 +183,41 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
 }
 
 
-void createNewProcesses(CPU_p this) {
+void createNewIOProcesses(CPU_p this) {
     int random_num_range_0_to_5 = (rand() % 6) + 1; //create a random number of new processes, between 0 and 5
     int i;
-    //printf("%d\n", random_num_range_0_to_5);
+
     //place random num processes into cpu_p->createdQueue
     PCB_p newPCB = NULL;
     for (i = 1; i <= random_num_range_0_to_5; i++) {
-        GLOBAL_NEW_PROC_ID += 1;
+        GLOBAL_NEW_IO_PROC_ID += 1;
         //PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSp)
-        newPCB = PCB_constructor(GLOBAL_NEW_PROC_ID, 1, new, 0, 0, 0, rand());
-        printf("Process created: PID %d at %ld\n", newPCB->process_num, (long)this->currentProcess->creation);
+        newPCB = PCB_constructor(GLOBAL_NEW_IO_PROC_ID, 1, new, 0, 0, 0, rand());
+        printf("I/O process created: PID %d at %ld\n", newPCB->process_num, (long)this->currentProcess->creation);
         FIFO_enqueue(this->createdQueue, newPCB);
     }
+}
+
+void createNewIntensiveProcesses(CPU_p this) {
+    int random_num_range_0_to_5 = (rand() % 6) + 1; //create a random number of new processes, between 0 and 5
+    int i;
+
+    //place random num processes into cpu_p->createdQueue
+    PCB_p newPCB = NULL;
+    for (i = 1; i <= random_num_range_0_to_5; i++) {
+        GLOBAL_NEW_INTENSIVE_PROC_ID += 1;
+
+        //NOTE: Priority = 0
+        newPCB = PCB_constructor(GLOBAL_NEW_INTENSIVE_PROC_ID, 0, new, 0, 0, 0, rand());
+        newPCB->io_1_array_ptr = NULL;  //Call free(newPCB->io_1_traps); ???
+        newPCB->io_2_array_ptr = NULL;  //Call free(newPCB->io_2_traps); ???
+        printf("Compute intensive process created: PID %d at %ld\n", newPCB->process_num, (long)this->currentProcess->creation);
+        FIFO_enqueue(this->createdQueue, newPCB);
+    }
+}
+
+void createNewRealisticProcesses(CPU_p this) {
+    //TODO: Producer consumer pair creation.
 }
 
 CPU_p CPU_constructor(void) {

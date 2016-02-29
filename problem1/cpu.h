@@ -40,7 +40,7 @@ typedef CPU * CPU_p;
 /*** global extern variables ***/
 extern int GLOBAL_TIMER_INTERRUPT;
 extern int GLOBAL_IO_COMPLETION_INTERRUPT;
-extern unsigned int GLOBAL_NEW_PROC_ID;
+extern unsigned int GLOBAL_NEW_IO_PROC_ID;
 extern PCB_p GLOBAL_IDLE_process;
 
 /*** function pointer signature used for all handler functions ***/
@@ -74,5 +74,10 @@ void CPU_dispatcher(CPU_p);
 //5.) Return
 
 char* CPU_toString(CPU_p);
+
+/*New for final assignment*/
+void createNewIOProcesses(CPU_p);
+void createNewIntensiveProcesses(CPU_p);
+void createNewRealisticProcesses(CPU_p);
 
 #endif /* CPU_H_ */

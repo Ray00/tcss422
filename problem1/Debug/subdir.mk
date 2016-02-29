@@ -5,7 +5,6 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../IO_x.c \
-../IO_x_.c \
 ../cpu.c \
 ../discontinuities.c \
 ../fifoqueue.c \
@@ -19,7 +18,6 @@ C_SRCS += \
 
 OBJS += \
 ./IO_x.o \
-./IO_x_.o \
 ./cpu.o \
 ./discontinuities.o \
 ./fifoqueue.o \
@@ -33,7 +31,6 @@ OBJS += \
 
 C_DEPS += \
 ./IO_x.d \
-./IO_x_.d \
 ./cpu.d \
 ./discontinuities.d \
 ./fifoqueue.d \

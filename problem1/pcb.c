@@ -229,7 +229,7 @@ void PCB_terminate(PCB_p this) {
     //Set termination time
     this->termination = PCB_getTimestamp();
     this->state = halted;
-    
+
 }
 
 
@@ -251,7 +251,7 @@ struct tm * PCB_getTimestamp(void) {
     struct tm * timeinfo;
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
-    
+
     return timeinfo;
 }
 
