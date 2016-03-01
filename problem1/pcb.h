@@ -29,6 +29,7 @@ enum state_type {new, ready, running, interrupted, waiting, halted, idle};
 enum process_type {io_type, compIntense_type, realistic_type};
 
 typedef struct pcb_type {
+    void * childClass;
 	unsigned int process_num;
 	unsigned int priority;      /* extrinsic property */
     enum state_type state;      /* current state */
