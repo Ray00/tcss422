@@ -39,7 +39,13 @@ PCB_p PCB_constructor(unsigned int pID, unsigned int priority, enum state_type s
         result->addressSW = addSW;
         result->addressSpace = addSp;
         result->max_pc = MAX_PC;
-        result->terminate = randForTerminate % 6; //generate random terminate number
+
+        //To prevent infinite loop in CPU_cycle().
+        unsigned int terminateAtCycle = randForTerminate % 6;
+        if (terminateAtCycle == 0) {
+        	terminateAtCycle = 5;
+        }
+        result->terminate = terminateAtCycle; //generate random terminate number
         result->term_count = 0;
 
         //Get the creation time
@@ -340,3 +346,7 @@ unsigned int PCB_currPCHasIOCall (PCB_p this, unsigned int pc) {
 
      sprintf(result, "content: PCB_ID: %d, Priority: %d, State: %s, PC: 0x%04X \nCycles before termination: %d, Current cycle number: %d\n", this->process_num, this->priority, state_description, this->addressPC, this->terminate, this->term_count);
  }
+
+void PCB_setProcessType(PCB_p this, enum process_type type) {
+	this->processType = type;
+}

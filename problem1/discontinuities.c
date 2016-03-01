@@ -227,7 +227,7 @@ void DISCONT_dispatcher(CPU_p cpu_p) {
     /*NOT SURE WHY WE NEED TO DO THIS AGAIN?*/
 
     //every fourth context switch
-    if (GLOBAL_NEW_IO_PROC_ID % 4 == 0) {
+    if (GLOBAL_IO_PROC_COUNT % 4 == 0) {
         PCB_toString(last_process_p, message_buffer_p);
         printf("Interrupted Process: %s", message_buffer_p); //print the contents of the running process
         PCB_toString(last_process_p, message_buffer_p);
@@ -250,7 +250,7 @@ void DISCONT_dispatcher(CPU_p cpu_p) {
     STACK_push(cpu_p->sysStack, PCB_getPC(cpu_p->currentProcess));
 
     //after context switch
-    if (GLOBAL_NEW_IO_PROC_ID % 4 == 0) {
+    if (GLOBAL_IO_PROC_COUNT % 4 == 0) {
         PCB_toString(last_process_p, message_buffer_p);
         printf("Last Process: %s", message_buffer_p); //print the contents of the last process
         PCB_toString(next_process_p, message_buffer_p);

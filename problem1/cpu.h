@@ -40,7 +40,7 @@ typedef CPU * CPU_p;
 /*** global extern variables ***/
 extern int GLOBAL_TIMER_INTERRUPT;
 extern int GLOBAL_IO_COMPLETION_INTERRUPT;
-extern unsigned int GLOBAL_NEW_IO_PROC_ID;
+extern unsigned int GLOBAL_IO_PROC_COUNT;
 extern PCB_p GLOBAL_IDLE_process;
 
 /*** function pointer signature used for all handler functions ***/

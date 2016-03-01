@@ -26,6 +26,7 @@
 #define MAX_CALLS_FOR_IO 4
 
 enum state_type {new, ready, running, interrupted, waiting, halted, idle};
+enum process_type {io_type, compIntense_type, realistic_type};
 
 typedef struct pcb_type {
 	unsigned int process_num;
@@ -44,6 +45,9 @@ typedef struct pcb_type {
 		unsigned int * io_2_traps;
 //    int reg_file[NUMREGS];      /* contents of GPRs */
     unsigned int addressSpace;  /* where in memory */
+
+    //NOTE: New for Final Project
+    enum process_type processType;
 } PCB;
 typedef PCB *PCB_p;
 
@@ -64,5 +68,8 @@ void PCB_incrementTermCount(PCB_p);
 struct tm * PCB_getTimestamp(void);
 unsigned int PCB_currPCHasIOCall(PCB_p, unsigned int);
 void PCB_toString(PCB_p, char *);
+
+//NOTE: New for final project
+void PCB_setProcessType(PCB_p, enum process_type);
 
 #endif /* PCB_H_ */
