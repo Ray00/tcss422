@@ -19,6 +19,7 @@
 #include <time.h>
 #include "pcb.h"
 #include "fifoqueue.h"
+#include "priorityqueue.h"
 #include "timer.h"
 #include "stack.h"
 #include "IO_x.h"
@@ -31,7 +32,7 @@ typedef struct cpu_type {
     unsigned int pc;
     STACK_STR_p sysStack;
     PCB_p currentProcess;
-    PCB_QUEUE_STR_p readyQueue;					//fifoqueue
+    PriorityQueue_p readyQueue;					//priorityqueue
     PCB_QUEUE_STR_p createdQueue;				//fifoqueue
     PCB_QUEUE_STR_p terminatedQueue;			//fifoqueue
 } CPU;

@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "pcb.h"
 #include "fifoqueue.h"
+#include "priorityqueue.h"
 #include "cpu.h"
 #include "IO_x.h"
 #include "timer.h"

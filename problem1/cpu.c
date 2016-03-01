@@ -69,15 +69,15 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
         while (FIFO_size(this->createdQueue) != 0) {
             PCB_p temp_pcb_p = FIFO_dequeue(this->createdQueue);
             PCB_setState(temp_pcb_p, ready);
-            FIFO_enqueue(this->readyQueue, temp_pcb_p);
+            PriorityQueue_enqueue(this->readyQueue, temp_pcb_p);	//NOTE: Now a priority queue
 //            printf("Process ID: %u Enqueued\n", temp_pcb_p->process_num); //print message that process has been enqueued
 //            PCB_toString(temp_pcb_p, message_buffer_p);
 //            puts(message_buffer_p); //print PCB contents
         }
 
         //if current process is IDLE and processes available in readyQueue, load first process in readyQueue into CPU
-        if (this->currentProcess == GLOBAL_IDLE_process && FIFO_size(this->readyQueue) > 0) {
-            this->currentProcess = FIFO_dequeue(this->readyQueue);
+        if (this->currentProcess == GLOBAL_IDLE_process && PriorityQueue_size(this->readyQueue) > 0) {
+            this->currentProcess = PriorityQueue_dequeue(this->readyQueue);
             PCB_setState(this->currentProcess, running);
         }
 
@@ -184,8 +184,8 @@ void CPU_cycle(CPU_p this, DISCONT_STR_p timerInterrupt, DISCONT_STR_p IOComplet
             this->currentProcess->addressPC = this->pc;
             FIFO_enqueue(this->terminatedQueue, this->currentProcess);
             //bring in new process from readyqueue
-			if (FIFO_size(this->readyQueue) > 0) {
-				this->currentProcess = FIFO_dequeue(this->readyQueue);
+			if (PriorityQueue_size(this->readyQueue) > 0) {
+				this->currentProcess = PriorityQueue_dequeue(this->readyQueue);
 			}
 			else {
 				this->currentProcess = GLOBAL_IDLE_process;
@@ -216,7 +216,7 @@ void createNewIOProcesses(CPU_p this) {
     	GLOBAL_PID_COUNTER++;	//Total number of processes made
         GLOBAL_IO_PROC_COUNT++;	//Number of current IO processes active in program
         //unsigned int pID, unsigned int priority, enum state_type s, unsigned int addPC, unsigned int addSW, unsigned int addSp, unsigned int randForTerminate
-        newPCB = PCB_constructor(GLOBAL_PID_COUNTER, 1, new, 0, 0, 0, rand());
+        newPCB = PCB_constructor(GLOBAL_PID_COUNTER, 0, new, 0, 0, 0, rand());
         PCB_setProcessType(newPCB, io_type);
         printf("I/O process created: PID %d at %ld\n", newPCB->process_num, (long)this->currentProcess->creation);
         FIFO_enqueue(this->createdQueue, newPCB);
@@ -264,7 +264,7 @@ CPU_p CPU_constructor(void) {
     newCPU->sysStack = STACK_constructor(200);
     newCPU->currentProcess = NULL;
     /* queue instantiation */
-    newCPU->readyQueue = FIFO_constructor();
+    newCPU->readyQueue = PriorityQueue_constructor();
     newCPU->createdQueue = FIFO_constructor(); //newly launched processes queue
     newCPU->terminatedQueue = FIFO_constructor(); //"for deallocation" queue
 
@@ -274,7 +274,7 @@ CPU_p CPU_constructor(void) {
 void CPU_destructor(CPU_p this) {
     TIMER_destructor(this->timer);
     STACK_destructor(this->sysStack);
-    FIFO_destructor(this->readyQueue);
+    PriorityQueue_destructor(this->readyQueue);
     FIFO_destructor(this->createdQueue);
     FIFO_destructor(this->terminatedQueue);
     PCB_destructor(this->currentProcess);
@@ -308,11 +308,13 @@ PCB_p CPU_getCurrentProcess(CPU_p this) {
 }
 
 void CPU_readyQueue_enqueue(CPU_p this, PCB_p pcb) {
-    FIFO_enqueue(this->readyQueue, pcb);
+	//NOTE: Now a priority queue
+    PriorityQueue_enqueue(this->readyQueue, pcb);
 }
 
 PCB_p CPU_readyQueue_dequeue(CPU_p this) {
-    return FIFO_dequeue(this->readyQueue);
+	//NOTE: Now a priority queue
+    return PriorityQueue_dequeue(this->readyQueue);
 }
 
 void CPU_createdQueue_enqueue(CPU_p this, PCB_p pcb) {

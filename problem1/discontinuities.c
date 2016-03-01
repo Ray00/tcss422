@@ -174,7 +174,7 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
 		//1.) Change its state from interrupted to ready
             	cpu_p->currentProcess->state = ready;
             	//2.) Put the process back into the ready queue (if not idle process)
-	    	FIFO_enqueue(cpu_p->readyQueue, cpu_p->currentProcess);
+	    	PriorityQueue_enqueue(cpu_p->readyQueue, cpu_p->currentProcess);
 	}
 
             //3.) Upcall to dispatcher
@@ -186,11 +186,11 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
 //        	printf("%d\n\n", this->interrupting_device->elapsed_cycles);
             unblocked_process = IO_dequeue_waitQueue(DISCONT_getInterruptingDevice(this));
             printf(", PID %u put in ready queue\n", unblocked_process->process_num);
-            FIFO_enqueue(cpu_p->readyQueue, unblocked_process);
+            PriorityQueue_enqueue(cpu_p->readyQueue, unblocked_process);
             break;
         default: //io call handler
             //grab new process to run
-            cpu_p->currentProcess = FIFO_dequeue(cpu_p->readyQueue);
+            cpu_p->currentProcess = PriorityQueue_dequeue(cpu_p->readyQueue);
             //push pc of newly dequeued readyQueue process int sysStack
             if (cpu_p->currentProcess != NULL) {
                 PCB_setState(cpu_p->currentProcess, running);
@@ -216,7 +216,7 @@ void DISCONT_scheduler(DISCONT_STR_p this, CPU_p cpu_p) {
 
 
 void DISCONT_dispatcher(CPU_p cpu_p) {
-    PCB_p next_process_p = FIFO_dequeue(cpu_p->readyQueue);
+    PCB_p next_process_p = PriorityQueue_dequeue(cpu_p->readyQueue);
     if (next_process_p == NULL) {
 	next_process_p = GLOBAL_IDLE_process;
     }

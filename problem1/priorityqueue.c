@@ -33,32 +33,32 @@ PriorityQueue_p PriorityQueue_constructor(void) {
     } else {
         return NULL;
     }
+    prioQ->size = 0;
     //Return Priority Queue Pointer
     return prioQ;
 }
-
-// Destructs PriorityQueue
-// *To be implemented
 
 void PriorityQueue_destructor(PriorityQueue_p this) {
   free(this);
 }
 
 // Add a process to the PriorityQueue
-void priority_enqueue(PriorityQueue_p this, PCB_p pcb_p) {
+void PriorityQueue_enqueue(PriorityQueue_p this, PCB_p pcb_p) {
 	unsigned int priorityLevel = pcb_p->priority;
 	PCB_QUEUE_STR_p priorityPointer = this->queueArray[priorityLevel];
 	FIFO_enqueue(priorityPointer, pcb_p);
+	this->size++;
     return;
 }
 
 // Removes process based on priority in PriorityQueue
-PCB_p priority_dequeue(PriorityQueue_p this) {
+PCB_p PriorityQueue_dequeue(PriorityQueue_p this) {
 	PCB_p temp = NULL;
 	int i = 0;
 	for (i = 0; i < MAX_PRIORITY; i++) {
 		temp = FIFO_dequeue(this->queueArray[i]);
 		if (temp != NULL) {
+			this->size--;
             return temp;
 		}
 	}
@@ -80,4 +80,8 @@ char * PriorityQueue_toString(PriorityQueue_p this) {
     }
     strcat(result, "\n\n");
     return result;
+}
+
+unsigned int PriorityQueue_size(PriorityQueue_p this) {
+	return this->size;
 }
